@@ -8,9 +8,6 @@
 
 
 
-source migration_config.sh
-[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1 }
-
 if [ -z "$1" ]; then
     echo "[ ERROR ] backup file name missing "
     echo
@@ -18,6 +15,9 @@ if [ -z "$1" ]; then
     echo
     exit 1
 fi
+
+source ./migration_config.sh
+[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1;}
 
 echo
 INPUT=$1
@@ -116,18 +116,17 @@ fi
 find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_NAME/$NEW_DB_NAME/g" {} \;
 find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_USERNAME/$NEW_DB_USERNAME/g" {} \;
 find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_PASSWORD/$NEW_DB_PASSWORD/g" {} \;
-find $RESTORE_DIR -type f -exec sed -i -e "s/$WEBSITE_ROOT_DIR/$NEW_WEBSITE_ROOT_DIR/g" {} \;
 find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_HOST/$NEW_DB_HOST/g" {} \;
 find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_PORT/$NEW_DB_PORT/g" {} \;
 find $RESTORE_DIR -type f -exec sed -i -e "s/$DOMAIN/$NEW_DOMAIN/g" {} \;
 
 # import database 
-mysqldump -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD $NEW_DB_NAME < "${RESTORE_DIR}/db/database.sql"
+mysqldump -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD $NEW_DB_NAME < ${RESTORE_DIR}/db/database.sql
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ] Database Import Failed"; exit 1; }
 
 # mv backup code to website root 
-mv "${RESTORE_DIR}/code/*" "${NEW_WEBSITE_ROOT_DIR}/"
+mv ${RESTORE_DIR}/code/* ${NEW_WEBSITE_ROOT_DIR}/
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ] Website copy failed"; exit 1; }
 
 #
-echo "[ SUCCESS ] website restored ( $NEW_DOMAIN )"
+echo "[ SUCCESS ] website migrated successfully ( $NEW_DOMAIN )"
