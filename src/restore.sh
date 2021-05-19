@@ -82,6 +82,9 @@ echo "  DB HOST       	  : $DB_HOST"
 echo "  DB PORT       	  : $DB_PORT"
 echo 
 
+#safely get full path of website root ( this method is use to handle directories like ~/ )
+cd $WEBSITE_ROOT_DIR
+WEBSITE_ROOT_DIR=`pwd`
 
 ########### Check if database is empty ##############
 table_count=$(mysql -u$DB_USERNAME -p$DB_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)

@@ -41,6 +41,10 @@ INPUT=$1
 BACKUP_FILE=`basename $INPUT`
 BACKUP_DIR=`dirname $INPUT`
 
+#safely get full path of backup directory ( this method is use to handle directories like ~/ )
+cd $BACKUP_DIR
+BACKUP_DIR=`pwd`
+
 STRIP_EXTN1="${BACKUP_FILE%.*}"
 EXTN1="${BACKUP_FILE##*.}"
 
@@ -48,6 +52,7 @@ STRIP_EXTN2="${STRIP_EXTN1%.*}"
 EXTN2="${STRIP_EXTN1##*.}"
 
 RESTORE_DIR=$STRIP_EXTN2
+
 
 #echo " EXTENSION 1          : " $EXTN1
 #echo " EXTENSION 2          : " $EXTN2
@@ -118,6 +123,9 @@ echo "  DB HOST       	  : $NEW_DB_HOST"
 echo "  DB PORT       	  : $NEW_DB_PORT"
 echo 
 
+#safely get full path of website root ( this method is use to handle directories like ~/ )
+cd $NEW_WEBSITE_ROOT_DIR
+NEW_WEBSITE_ROOT_DIR=`pwd`
 
 
 ########### Search and Replace OLD SERVER DETAILS -> NEW SERVER DETAILS ####################

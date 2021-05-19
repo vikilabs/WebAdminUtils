@@ -17,7 +17,7 @@ MINUTE=$(date '+%M')
 TIME_STAMP="D${DAY}${MONTH}${YEAR}_T${HOUR}${MINUTE}"
 
 ######################## IMPORT CONFIGURATION ################
-source config.sh
+source ./config.sh
 [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
 
 ####################### PRE VALIDATION        ###############
@@ -40,6 +40,10 @@ echo "  Backup Directory  : $BACKUP_DIR"
 echo "  Backup Label      : $BACKUP_LABEL"
 echo "  Backup File       : ${BACKUP_LABEL}.tar.gz"
 echo 
+
+#safely get full path of website root ( this method is use to handle directories like ~/ )
+cd $WEBSITE_ROOT_DIR
+WEBSITE_ROOT_DIR=`pwd`
 
 ####################### DB ACCESS CHECK ######################
 table_count=$(mysql -u$DB_USERNAME -p$DB_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)
