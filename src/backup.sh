@@ -93,7 +93,3 @@ tar -czvf "${BACKUP_LABEL}.tar.gz" $BACKUP_LABEL
 rm -rf $BACKUP_LABEL
 [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
 
-####################### ERROR LOG OUTPUT ##################################
-cat $LOG_FILE
-
-exit 0
