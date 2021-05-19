@@ -8,4 +8,5 @@ NEW_DB_PASSWORD='test_password'
 NEW_DB_HOST="localhost"
 NEW_DB_PORT="3306"
 
-NEW_WEBSITE_ROOT_DIR="/var/www/localhost"
+#Do not use single or double quotes
+NEW_WEBSITE_ROOT_DIR=/var/www/localhost

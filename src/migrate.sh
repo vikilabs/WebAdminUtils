@@ -16,7 +16,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-source ./migration_config.sh
+source ./migrate_config.sh
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1;}
 
 
@@ -35,20 +35,20 @@ if [ $file_count -gt 0 ];then
         exit 1
 fi
 
-
 echo
 INPUT=$1
-BACKUP_FILE=`basename $INPUT`
-BACKUP_DIR=`dirname $INPUT`
+SOURCE_FILE=`basename $INPUT`
+SOURCE_PATH=`dirname $INPUT`
 
 #safely get full path of backup directory ( this method is use to handle directories like ~/ )
-cd $BACKUP_DIR
+cd $SOURCE_PATH
+[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
+SOURCE_PATH=`pwd`
+cd $SOURCE_PATH
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
 
-BACKUP_DIR=`pwd`
-
-STRIP_EXTN1="${BACKUP_FILE%.*}"
-EXTN1="${BACKUP_FILE##*.}"
+STRIP_EXTN1="${SOURCE_FILE%.*}"
+EXTN1="${SOURCE_FILE##*.}"
 
 STRIP_EXTN2="${STRIP_EXTN1%.*}"
 EXTN2="${STRIP_EXTN1##*.}"
@@ -86,17 +86,18 @@ done
 echo
 
 # Enter backup directory
-cd $BACKUP_DIR
+cd $SOURCE_PATH
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
 
 # Remove Old Restore Folder ( if any )
 rm -rf $RESTORE_DIR
 
 # Extract backup archive
-tar -zxvf $BACKUP_FILE
+tar -zxvf $SOURCE_FILE
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
 
 #import config
+cd $SOURCE_PATH
 source ${RESTORE_DIR}/restore_config.sh
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
 
@@ -133,7 +134,7 @@ NEW_WEBSITE_ROOT_DIR=`pwd`
 
 
 ########### Search and Replace OLD SERVER DETAILS -> NEW SERVER DETAILS ####################
-
+cd $SOURCE_PATH
 find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_NAME/$NEW_DB_NAME/g" {} \;
 find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_USERNAME/$NEW_DB_USERNAME/g" {} \;
 find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_PASSWORD/$NEW_DB_PASSWORD/g" {} \;
@@ -142,10 +143,12 @@ find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_PORT/$NEW_DB_PORT/g" {} \;
 find $RESTORE_DIR -type f -exec sed -i -e "s/$DOMAIN/$NEW_DOMAIN/g" {} \;
 
 # import database 
+cd $SOURCE_PATH
 mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD $NEW_DB_NAME < ${RESTORE_DIR}/db/database.sql
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ] Database Import Failed"; exit 1; }
 
 # mv backup code to website root 
+cd $SOURCE_PATH
 mv ${RESTORE_DIR}/code/* ${NEW_WEBSITE_ROOT_DIR}/
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ] Website copy failed"; exit 1; }
 
