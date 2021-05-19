@@ -10,4 +10,10 @@ Set of essential scripts to manage a website.
 	4. install.sh	-> install a website from source 			[ status: in progress ]
  
 
+## Quick Install
+
+
+	wget https://github.com/vikilabs/web_admin_scripts/blob/master/tarball/webadmin_scripts.tar.gz?raw=true -O script.tar.gz; tar -zxvf script.tar.gz;cd webadmin_scripts
+
+
 
