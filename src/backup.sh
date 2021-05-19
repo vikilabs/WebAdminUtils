@@ -57,7 +57,7 @@ mysqldump -u$DB_USERNAME  -p$DB_PASSWORD $DB_NAME > "$BACKUP_DIR/$BACKUP_LABEL/d
 [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
 
 #######################  copy website content to backup directory #########
-cp -arf "$WEBSITE_ROOT_DIR/*" "$BACKUP_DIR/$BACKUP_LABEL/code/"
+cp -arf $WEBSITE_ROOT_DIR/* $BACKUP_DIR/$BACKUP_LABEL/code/
 [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
 
 #######################  Optimize Backup ##################################
@@ -92,3 +92,8 @@ tar -czvf "${BACKUP_LABEL}.tar.gz" $BACKUP_LABEL
 #######################  remove $BACKUP_LABEL directory ###################
 rm -rf $BACKUP_LABEL
 [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+
+####################### ERROR LOG OUTPUT ##################################
+cat $LOG_FILE
+
+exit 0

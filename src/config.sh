@@ -13,4 +13,4 @@ WEBSITE_ROOT_DIR="/var/www/example.com"
 #website backup directory ( don't keep / at the end).
 BACKUP_DIR="/var/www/backup"
 
-LOG_FILE="/var/www/${DOMAIN}_backup.log"
+LOG_FILE="${BACKUP_DIR}/${DOMAIN}_backup.log"
