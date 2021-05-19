@@ -84,13 +84,20 @@ echo
 
 
 ########### Check if database is empty ##############
-table_count=$(mysql -u$NEW_DB_USERNAME -p$NEW_DB_PASSWORD -h $NEW_DB_HOST -P $NEW_DB_PORT $NEW_DB_NAME -e "SHOW TABLES;" | wc -l)
-
+table_count=$(mysql -u$DB_USERNAME -p$DB_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)
 
 if [ $table_count -gt 0 ];then
         echo "[ ERROR ] [ ${LINENO} ] DB is not empty ( table_count : $table_count ), truncate database before restoring"
-	exit 1
+        exit 1
 fi
+
+########### Check if directory is empty ##############
+file_count=`ls ${WEBSITE_ROOT_DIR}/ | wc -l`
+if [ $file_count -gt 0 ];then
+        echo "[ ERROR ] [ ${LINENO} ] website root directory is not empty, clear all files before restoring"
+        exit 1
+fi
+
 
 # import database 
 mysqldump -u$DB_USERNAME  -p$DB_PASSWORD $DB_NAME < "${RESTORE_DIR}/db/database.sql"

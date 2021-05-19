@@ -19,6 +19,23 @@ fi
 source ./migration_config.sh
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1;}
 
+
+########### Check if database is empty ##############
+table_count=$(mysql -u$NEW_DB_USERNAME -p$NEW_DB_PASSWORD -h $NEW_DB_HOST -P $NEW_DB_PORT $NEW_DB_NAME -e "SHOW TABLES;" | wc -l)
+
+if [ $table_count -gt 0 ];then
+        echo "[ ERROR ] [ ${LINENO} ] DB is not empty ( table_count : $table_count ), truncate database before migrating"
+        exit 1
+fi
+
+########### Check if directory is empty ##############
+file_count=`ls ${NEW_WEBSITE_ROOT_DIR}/ | wc -l`
+if [ $file_count -gt 0 ];then
+        echo "[ ERROR ] [ ${LINENO} ] website root directory is not empty, clear all files before migrating"
+        exit 1
+fi
+
+
 echo
 INPUT=$1
 BACKUP_FILE=`basename $INPUT`
@@ -102,14 +119,6 @@ echo "  DB PORT       	  : $NEW_DB_PORT"
 echo 
 
 
-
-########### Check if database is empty ##############
-table_count=$(mysql -u$NEW_DB_USERNAME -p$NEW_DB_PASSWORD -h $NEW_DB_HOST -P $NEW_DB_PORT $NEW_DB_NAME -e "SHOW TABLES;" | wc -l)
-
-if [ $table_count -gt 0 ];then
-        echo "[ ERROR ] [ ${LINENO} ] DB is not empty ( table_count : $table_count ), truncate database before migrating"
-	exit 1
-fi
 
 ########### Search and Replace OLD SERVER DETAILS -> NEW SERVER DETAILS ####################
 
