@@ -41,6 +41,22 @@ echo "  Backup Label      : $BACKUP_LABEL"
 echo "  Backup File       : ${BACKUP_LABEL}.tar.gz"
 echo 
 
+####################### DB ACCESS CHECK ######################
+table_count=$(mysql -u$DB_USERNAME -p$DB_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)
+
+if [ $? -ne 0 ];then
+        echo "[ ERROR ] [ ${LINENO} ] DB access error"
+        exit 1
+fi
+
+########### CHECK IF WEBSITE CONTENT  IS AVAILABLE OR NOT  ##############
+file_count=`ls ${WEBSITE_ROOT_DIR}/ | wc -l`
+if [ $file_count -le 0 ];then
+        echo "[ ERROR ] [ ${LINENO} ] website root directory is empty, nothing to backup"
+        exit 1
+fi
+
+
 #remove any backup directory with same name
 rm -rf "$BACKUP_DIR/$BACKUP_LABEL"
 
