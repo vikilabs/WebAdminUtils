@@ -43,6 +43,7 @@ echo
 
 #safely get full path of website root ( this method is use to handle directories like ~/ )
 cd $WEBSITE_ROOT_DIR
+[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
 WEBSITE_ROOT_DIR=`pwd`
 
 ####################### DB ACCESS CHECK ######################

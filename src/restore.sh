@@ -59,6 +59,7 @@ echo
 
 # Enter backup directory
 cd $BACKUP_DIR
+[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
 
 # Remove Old Restore Folder ( if any )
 rm -rf $RESTORE_DIR
@@ -84,6 +85,7 @@ echo
 
 #safely get full path of website root ( this method is use to handle directories like ~/ )
 cd $WEBSITE_ROOT_DIR
+[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
 WEBSITE_ROOT_DIR=`pwd`
 
 ########### Check if database is empty ##############
