@@ -34,6 +34,8 @@ echo "  Website Root      : $WEBSITE_ROOT_DIR"
 echo "  DB NAME           : $DB_NAME"
 echo "  DB USER           : $DB_USERNAME"
 echo "  DB PASSWORD       : xxxxxxxxx"
+echo "  DB HOST       	  : $DB_HOST"
+echo "  DB PORT       	  : $DB_PORT"
 echo "  Backup Directory  : $BACKUP_DIR"
 echo "  Backup Label      : $BACKUP_LABEL"
 echo "  Backup File       : ${BACKUP_LABEL}.tar.gz"
@@ -74,7 +76,10 @@ if [ -f "$CMD" ]; then
     $CMD "$BACKUP_DIR/$BACKUP_LABEL/code/"
 fi
 
+###################### Generate Restore Config ############################
 
+cp $CURRENT_DIR/config.sh $BACKUP_DIR/$BACKUP_LABEL/restore_config.sh
+[ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
 
 #######################  create a tar.gz archive from backup ##############
 

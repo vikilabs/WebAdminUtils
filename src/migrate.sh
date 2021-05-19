@@ -11,4 +11,6 @@
 source config.sh
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1 }
 
+./restore.sh
+[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1 }
 

@@ -7,10 +7,6 @@
 #		Licence : MIT
 
 
-source config.sh
-[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
-
-
 if [ -z "$1" ]; then
     echo "[ ERROR ] backup file name missing "
     echo
@@ -51,15 +47,6 @@ if [ "$EXTN2" != "tar" ]; then
     exit 1
 fi
 
-
-echo "  Backup File       : $BACKUP_FILE"
-echo "  Website Root      : $WEBSITE_ROOT_DIR"
-echo "  DB NAME           : $DB_NAME"
-echo "  DB USER           : $DB_USERNAME"
-echo "  DB PASSWORD       : xxxxxxxxx"
-echo "  Backup Directory  : $BACKUP_DIR"
-echo
-
 while true; do
 read -p "  Do you wish to restore this website from backup ( YES / NO )?  " user_input
 echo
@@ -73,9 +60,36 @@ echo
 # Enter backup directory
 cd $BACKUP_DIR
 
+# Remove Old Restore Folder ( if any )
+rm -rf $RESTORE_DIR
+
 # Extract backup archive
 tar -zxvf $BACKUP_FILE
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
+
+#import config
+source ${RESTORE_DIR}/restore_config.sh
+[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
+
+########### Restore Config Details ##################
+
+echo
+echo "  Website Root      : $WEBSITE_ROOT_DIR"
+echo "  DB NAME           : $DB_NAME"
+echo "  DB USER           : $DB_USERNAME"
+echo "  DB PASSWORD       : $DB_PASSWORD"
+echo "  DB HOST       	  : $DB_HOST"
+echo "  DB PORT       	  : $DB_PORT"
+echo 
+
+
+########### Check if database is empty ##############
+table_count=$(mysql -u$DB_USERNAME -p$DB_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "select count(*) from INFORMATION_SCHEMA.TABLES;" -s)
+
+if [ $table_count -gt 0 ];then
+        echo "[ ERROR ] [ ${LINENO} ] DB is not empty ( table_count : $table_count ), truncate database before restoring"
+	exit 1
+fi
 
 # import database 
 mysqldump -u$DB_USERNAME  -p$DB_PASSWORD $DB_NAME < "${RESTORE_DIR}/db/database.sql"
