@@ -20,11 +20,31 @@ TIME_STAMP="D${DAY}${MONTH}${YEAR}_T${HOUR}${MINUTE}"
 source ./config.sh
 [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
 
+####################### CREATE BACKUP DIR IF IT DOESN'T EXIST #######
+cd $BACKUP_DIR 2> /dev/null 1>/dev/null
+if [ $? -ne 0 ]; then
+    mkdir -p $BACKUP_DIR
+fi 
+
+####################### GET ABSOLUTE PATH #########################
+cd $BACKUP_DIR
+[ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+BACKUP_DIR=`pwd -P`
+
+cd $WEBSITE_ROOT_DIR
+[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
+WEBSITE_ROOT_DIR=`pwd -P`
+
+
 ####################### PRE VALIDATION        ###############
 if [ "$WEBSITE_ROOT_DIR" = "$BACKUP_DIR" ]; then
     echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] WEBSITE_ROOT_DIR and BACKUP_DIR should be different" >> $LOG_FILE
     exit 1
 fi
+
+cd $BACKUP_DIR
+[ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+
 
 ####################### CREATE BACKUP LABEL   ##############
 BACKUP_LABEL="${DOMAIN}_${TIME_STAMP}"
@@ -40,11 +60,6 @@ echo "  Backup Directory  : $BACKUP_DIR"
 echo "  Backup Label      : $BACKUP_LABEL"
 echo "  Backup File       : ${BACKUP_LABEL}.tar.gz"
 echo 
-
-#safely get full path of website root ( this method is use to handle directories like ~/ )
-cd $WEBSITE_ROOT_DIR
-[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
-WEBSITE_ROOT_DIR=`pwd`
 
 ####################### DB ACCESS CHECK ######################
 table_count=$(mysql -u$DB_USERNAME -p$DB_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)

@@ -6,7 +6,7 @@
 #		Contact	: vikilabs.org
 #		Licence : MIT
 
-
+# ARGUMENT_CHECK {
 if [ -z "$1" ]; then
     echo "[ ERROR ] backup file name missing "
     echo
@@ -14,7 +14,10 @@ if [ -z "$1" ]; then
     echo
     exit 1
 fi
+# }
 
+
+# INPUT_VALIDATION {
 echo
 INPUT=$1
 BACKUP_FILE=`basename $INPUT`
@@ -46,16 +49,20 @@ if [ "$EXTN2" != "tar" ]; then
     echo
     exit 1
 fi
+# }
 
+# GET_USER_CONFIRMATION {
 while true; do
-read -p "  Do you wish to restore this website from backup ( YES / NO )?  " user_input
-echo
-case $user_input in
-[YES]* ) echo "  YES : Restore Initiated"; break;;
-* ) echo "  NO ( DEFAULT )  : Aborting Restore Operation";echo;exit;;
-esac
+    read -p "  Do you wish to restore this website from backup ( YES / NO )?  " user_input
+    echo
+    case $user_input in
+        [YES]* ) echo "  YES : Restore Initiated"; break;;
+        * ) echo "  NO ( DEFAULT )  : Aborting Restore Operation";echo;exit;;
+    esac
 done
 echo
+# }
+
 
 # Enter backup directory
 cd $BACKUP_DIR
@@ -83,10 +90,10 @@ echo "  DB HOST       	  : $DB_HOST"
 echo "  DB PORT       	  : $DB_PORT"
 echo 
 
-#safely get full path of website root ( this method is use to handle directories like ~/ )
+####################### GET ABSOLUTE PATH #########################
 cd $WEBSITE_ROOT_DIR
 [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
-WEBSITE_ROOT_DIR=`pwd`
+WEBSITE_ROOT_DIR=`pwd -P`
 
 ########### Check if database is empty ##############
 table_count=$(mysql -u$DB_USERNAME -p$DB_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)
