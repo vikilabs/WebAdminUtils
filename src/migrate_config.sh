@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #Feed the new domain name of your website
 NEW_DOMAIN="localhost"
 

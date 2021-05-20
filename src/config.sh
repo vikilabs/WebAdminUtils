@@ -1,3 +1,5 @@
+#!/bin/bash
+
 #enter the website address
 DOMAIN="example.com"
 
