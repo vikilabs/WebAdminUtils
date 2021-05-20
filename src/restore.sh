@@ -32,7 +32,7 @@ function db_empty_check()
     if [ $table_count -gt 0 ];then
         echo "[ ERROR ] [ ${LINENO} ] DB is not empty ( table_count : $table_count ), truncate database before restore"
         echo
-        echo "      -> $NEW_DB_NAME"
+        echo "      -> $DB_NAME"
         echo
         echo
         exit 1
@@ -115,8 +115,10 @@ function get_user_confirmation()
 
 function extract_backup_archive()
 {
+    echo
     echo "[ status ] extracting backup file : $SOURCE_FILE"
-    
+    echo
+
     # Enter backup directory
     cd $SOURCE_PATH
     [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
@@ -125,8 +127,9 @@ function extract_backup_archive()
     rm -rf $RESTORE_DIR
 
     # Extract backup archive
-    tar -zxvf $SOURCE_FILE 2> /dev/null
+    tar -zxvf $SOURCE_FILE 1> /dev/null
     [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
+    echo
 }
 
 #Old Configuration

@@ -121,7 +121,9 @@ function get_user_confirmation()
 
 function extract_backup_archive()
 {
+    echo
     echo "[ status ] extracting backup file : $SOURCE_FILE"
+    echo
     # Enter backup directory
     cd $SOURCE_PATH
     [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
@@ -132,6 +134,7 @@ function extract_backup_archive()
     # Extract backup archive
     tar -zxvf $SOURCE_FILE 1> /dev/null
     [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
+    echo
 }
 
 #Old Configuration
