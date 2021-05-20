@@ -103,8 +103,8 @@ function get_user_confirmation()
         read -p "  Do you wish to migrate this website from backup ( YES / NO )?  " user_input
         echo
         case $user_input in
-            [YES]* ) echo "  YES : Restore Initiated"; break;;
-            * ) echo "  NO ( DEFAULT )  : Aborting Restore Operation";echo;exit;;
+            [YES]* ) echo "  YES : Migrate Initiated"; break;;
+            * ) echo "  NO ( DEFAULT )  : Aborting Migrate Operation";echo;exit;;
         esac
     done
     echo

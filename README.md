@@ -17,3 +17,10 @@ Set of essential scripts to manage a website.
 
 
 
+## Tested Hosting Servers
+
+    - Hostinger 
+
+## Tested Linux Servers
+
+    
