@@ -6,7 +6,12 @@
 #		Contact	: vikilabs.org
 #		Licence : MIT
 
-CURRENT_DIR=`pwd`
+function get_current_dir()
+{
+    CURRENT_DIR=`pwd -P`
+}
+
+get_current_dir
 
 ######################### GET CURRENT TIME STAMP #############
 DAY=$(date '+%d')

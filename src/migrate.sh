@@ -9,6 +9,11 @@
 
 INPUT=$1
 
+function get_current_dir()
+{
+    CURRENT_DIR=`pwd -P`
+}
+
 function arg_check()
 {
     if [ -z "$INPUT" ]; then
@@ -22,7 +27,7 @@ function arg_check()
 
 function import_new_config()
 {
-    source ./migrate_config.sh
+    source $CURRENT_DIR/migrate_config.sh
     [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1;}
 }
 
@@ -123,9 +128,7 @@ function extract_backup_archive()
 #Old Configuration
 function import_old_config()
 {
-    #import config
-    cd $SOURCE_PATH
-    source ${RESTORE_DIR}/restore_config.sh
+    source $SOURCE_PATH/$RESTORE_DIR/restore_config.sh
     [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
 
 }
@@ -201,6 +204,7 @@ function migration_success()
 
 function main()
 {
+    get_current_dir
     arg_check
     import_new_config
     db_empty_check
