@@ -31,6 +31,10 @@ function db_empty_check()
 
     if [ $table_count -gt 0 ];then
         echo "[ ERROR ] [ ${LINENO} ] DB is not empty ( table_count : $table_count ), truncate database before restore"
+        echo
+        echo "      -> $NEW_DB_NAME"
+        echo
+        echo
         exit 1
     fi
 }
@@ -40,6 +44,10 @@ function dir_empty_check()
     file_count=`ls ${WEBSITE_ROOT_DIR}/ | wc -l`
     if [ $file_count -gt 0 ];then
         echo "[ ERROR ] [ ${LINENO} ] website root directory is not empty, clear all files before restoring"
+        echo
+        echo "      -> $WEBSITE_ROOT_DIR"
+        echo
+        echo
         exit 1
     fi
 }
@@ -107,6 +115,8 @@ function get_user_confirmation()
 
 function extract_backup_archive()
 {
+    echo "[ status ] extracting backup file : $SOURCE_FILE"
+    
     # Enter backup directory
     cd $SOURCE_PATH
     [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
@@ -115,7 +125,7 @@ function extract_backup_archive()
     rm -rf $RESTORE_DIR
 
     # Extract backup archive
-    tar -zxvf $SOURCE_FILE
+    tar -zxvf $SOURCE_FILE 2> /dev/null
     [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
 }
 
