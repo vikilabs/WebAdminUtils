@@ -23,4 +23,5 @@ Set of essential scripts to manage a website.
 
 ## Tested Linux Servers
 
+    - Ubuntu 16.04
     
