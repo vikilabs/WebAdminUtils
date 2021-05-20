@@ -11,7 +11,7 @@ INPUT=$1
 
 function arg_check()
 {
-    if [ -z "$1" ]; then
+    if [ -z "$INPUT" ]; then
         echo "[ ERROR ] backup file name missing "
         echo
         echo "[ EXAMPLE ] ./migrate.sh backup.tar.gz"
