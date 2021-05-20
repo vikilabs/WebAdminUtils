@@ -145,13 +145,13 @@ function print_config()
     echo
     echo "  PREVIOUS SERVER CONFIGURATION"
     echo
-    echo "  DOMAIN      	  : $DOMAIN"
+    echo "  DOMAIN            : $DOMAIN"
     echo "  Website Root      : $WEBSITE_ROOT_DIR"
     echo "  DB NAME           : $DB_NAME"
     echo "  DB USER           : $DB_USERNAME"
     echo "  DB PASSWORD       : $DB_PASSWORD"
-    echo "  DB HOST       	  : $DB_HOST"
-    echo "  DB PORT       	  : $DB_PORT"
+    echo "  DB HOST           : $DB_HOST"
+    echo "  DB PORT           : $DB_PORT"
     echo 
     echo
     echo "  Note: Make sure your existing config is same as above. If not use the following command,"

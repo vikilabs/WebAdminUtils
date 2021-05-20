@@ -150,12 +150,12 @@ function print_old_config()
     echo
     echo "  OLD CONFIGURATION"
     echo
-    echo "  DOMAIN      	  : $DOMAIN"
+    echo "  DOMAIN            : $DOMAIN"
     echo "  Website Root      : $WEBSITE_ROOT_DIR"
     echo "  DB NAME           : $DB_NAME"
     echo "  DB USER           : $DB_USERNAME"
     echo "  DB PASSWORD       : $DB_PASSWORD"
-    echo "  DB HOST       	  : $DB_HOST"
+    echo "  DB HOST           : $DB_HOST"
     echo "  DB PORT       	  : $DB_PORT"
     echo 
 }
@@ -165,13 +165,13 @@ function print_new_config()
     echo 
     echo "  NEW CONFIGURATION"
     echo 
-    echo "  DOMAIN      	  : $NEW_DOMAIN"
+    echo "  DOMAIN            : $NEW_DOMAIN"
     echo "  Website Root      : $NEW_WEBSITE_ROOT_DIR"
     echo "  DB NAME           : $NEW_DB_NAME"
     echo "  DB USER           : $NEW_DB_USERNAME"
     echo "  DB PASSWORD       : $NEW_DB_PASSWORD"
-    echo "  DB HOST       	  : $NEW_DB_HOST"
-    echo "  DB PORT       	  : $NEW_DB_PORT"
+    echo "  DB HOST           : $NEW_DB_HOST"
+    echo "  DB PORT           : $NEW_DB_PORT"
     echo 
 }
 
