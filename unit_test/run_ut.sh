@@ -140,20 +140,40 @@ function verify_restore_test_2()
 
 function migrate_test_1()
 {
-	cd sandbox
+    cd $CURRENT_DIR/sandbox
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-	echo "[ STATUS  ] backup_test_1"
-	./migrate_website $BACKUP_DIR/backup.tar.gz
-
-	echo "[ SUCCESS ] backup_test_1"
+	echo "[ STATUS  ] migrate_test_1"
+    ./migrate_website "$BACKUP_DIR/backup.tar.gz"
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+	echo "[ SUCCESS ] migrate_test_1"
 	cd $CURRENT_DIR
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+}
+
+function verify_migrate_test_1()
+{
+    cd $CURRENT_DIR
+    ./test_case_verify_migrate_1.sh    
+	[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ] verify_migrate_test_1 failed"; exit 1; }		
+    echo "[ SUCCESS ] verify_migrate_test_1()"
+}
+
+function clear_website_and_db()
+{
+    #clean website content
+    cd $WEBSITE_ROOT_DIR
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+    rm -rf *
+
+    #clean DB
+    mysql -u$DB_USERNAME -p$DB_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "DROP TABLE test_table;"
 }
 
 function cleanup()
 {
 	cd $CURRENT_DIR
     rm -rf sandbox
+    rm -rf test_website
 }
 
 function main()
@@ -165,13 +185,20 @@ function main()
     import_config
 
     #Do not change the order of test case execution
-    #success restore_test_1
-    #success verify_restore_test_1
-    #success backup_test_1
-    #success verify_backup_test_1
+    clear_website_and_db
+    restore_test_1
+    verify_restore_test_1
+
+    backup_test_1
+    verify_backup_test_1
+    
+    clear_website_and_db
     restore_test_2
     verify_restore_test_2
-    #migrate_test_1
+    
+    clear_website_and_db
+    migrate_test_1
+    verify_migrate_test_1
     echo
 
     cleanup
