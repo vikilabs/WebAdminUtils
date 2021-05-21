@@ -6,34 +6,39 @@ function get_current_dir()
 
 function init_sandbox()
 {
-	echo "[ STATUS  ] init_sandbox"
-	mkdir -p sandbox 1> /dev/null 2> /dev/null
-	rm -rf sandbox/* 1> /dev/null 2> /dev/null
-			 cp ../src/backup_website sandbox/
-		[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-			 cp ../src/install_website sandbox/
-		[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-			 cp ../src/migrate_website sandbox/
-		[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-			 cp ../src/restore_website sandbox/
-		[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-	echo "[ SUCCESS ] init_sandbox"
-			 }
+    echo "[ STATUS  ] init_sandbox"
+
+    cd $CURRENT_DIR
+
+    mkdir -p sandbox 1> /dev/null 2> /dev/null
+    rm -rf sandbox/* 1> /dev/null 2> /dev/null
+
+    cp ../src/backup_website sandbox/
+    [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+    cp ../src/install_website sandbox/
+    [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+    cp ../src/migrate_website sandbox/
+    [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+    cp ../src/restore_website sandbox/
+    [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+    echo "[ SUCCESS ] init_sandbox"
+}
 
 function copy_test_config()
 {
-	echo "[ STATUS  ] copy test config"
+    echo "[ STATUS  ] copy test config"
 
-	cp test_config/* sandbox/ 
-        [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }
+    cd $CURRENT_DIR
 
-	echo "[ SUCCESS ] copy test config"
-	cd $CURRENT_DIR
+    cp test_config/* sandbox/ 
+    [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }
+
+    echo "[ SUCCESS ] copy test config"
 }
 
 function import_config()
 {
-    source ./sandbox/config.sh
+    source $CURRENT_DIR/sandbox/config.sh
     [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ] "; exit 1; }
 }
 
@@ -47,25 +52,32 @@ function get_abs_path_backup_dir()
 
 function restore_test_1()
 {
-	cd sandbox
+    cd $CURRENT_DIR/sandbox
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] restore_test_1"
-	./restore_website ../test_website.tar.gz
-
+	./restore_website "../test_website.tar.gz"
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] restore_test_1"
 	cd $CURRENT_DIR
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 }
 
+function verify_restore_test_1()
+{
+    cd $CURRENT_DIR
+    ./test_case_verify_restore_1.sh    
+	[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ] verify_restore_test_1 failed"; exit 1; }		
+    echo "[ SUCCESS ] verify_restore_test_1()"
+}
+
 function backup_test_1()
 {
-	cd sandbox
-	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] backup_test_1"
 	
-	get_abs_path_backup_dir
-	cd $CURRENT_DIR
-	cd sandbox
+    get_abs_path_backup_dir
+	
+    cd $CURRENT_DIR/sandbox
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	
 	./backup_website 
 
@@ -103,6 +115,12 @@ function migrate_test_1()
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 }
 
+function cleanup()
+{
+	cd $CURRENT_DIR
+    rm -rf sandbox
+}
+
 function main()
 {
     echo
@@ -113,10 +131,13 @@ function main()
 
     #Do not change the order of test case execution
     restore_test_1
-    backup_test_1
-    restore_test_2
-    migrate_test_1
+    verify_restore_test_1
+    #backup_test_1
+    #restore_test_2
+    #migrate_test_1
     echo
+
+    cleanup
 }
 
 # main function

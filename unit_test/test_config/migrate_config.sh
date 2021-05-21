@@ -3,10 +3,10 @@
 # Keep all config values in single quotes unless specified otherwise
 
 #Feed the new domain name of your website
-NEW_DOMAIN='bugs.vikilabs.org'
-NEW_DB_NAME='u730147653_db'
-NEW_DB_USERNAME='u730147653_user'
-NEW_DB_PASSWORD='Db1234$ab'
+NEW_DOMAIN='testa.vikilabs.org'
+NEW_DB_NAME='u218639858_testa_db'
+NEW_DB_USERNAME='u218639858_testa_admin'
+NEW_DB_PASSWORD='Test$DB123'
 NEW_DB_HOST='localhost'
 NEW_DB_PORT='3306'
 

@@ -3,14 +3,14 @@
 # Keep all config values in single quotes unless specified otherwise
 
 #enter the website address
-DOMAIN='bugs.vikilabs.org'
+DOMAIN='testa.vikilabs.org'
 
-DB_NAME='u730147653_db'
-DB_USERNAME='u730147653_user'
+DB_NAME='u218639858_testa_db'
+DB_USERNAME='u218639858_testa_admin'
 
 #Keep the password inside single quotes ( Do not use double quotes )
 
-DB_PASSWORD='Db1234$ab'
+DB_PASSWORD='Test$DB123'
 DB_HOST='localhost'
 DB_PORT='3306'
 
