@@ -44,6 +44,9 @@ function import_config()
 
 function get_abs_path_backup_dir()
 {
+    #create backup directory
+    mkdir -p $BACKUP_DIR 1> /dev/null 2>/dev/null
+
     cd $BACKUP_DIR
     [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
     BACKUP_DIR=`pwd -P`
@@ -75,20 +78,45 @@ function backup_test_1()
 	echo "[ STATUS  ] backup_test_1"
 	
     get_abs_path_backup_dir
-	
+
+    #Delete any stale contents in backup directory
+    rm -rf $BACKUP_DIR/*  1> /dev/null 2>/dev/null
+
     cd $CURRENT_DIR/sandbox
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	
 	./backup_website 
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 
-	#copy backup_TIMESTAMP.tar.gz -> backup.tar.gz
-	mv $BACKUP_DIR/* $BACKUP_DIR/backup.tar.gz
+    
+	#change backup_TIMESTAMP.tar.gz -> backup.tar.gz
+    cd $BACKUP_DIR
+    tar -zxvf *.tar.gz 1> /dev/null
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+    rm *.tar.gz
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+    
+    #delete any log files
+    rm *.log
+
+    mv * backup
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+    tar -czvf backup.tar.gz backup 1> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	
 	echo "[ SUCCESS ] backup_test_1"
 	cd $CURRENT_DIR
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 }
+
+function verify_backup_test_1()
+{
+    cd $CURRENT_DIR
+    ./test_case_verify_backup_1.sh    
+	[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ] verify_backup_test_1 failed"; exit 1; }		
+    echo "[ SUCCESS ] verify_backup_test_1()"
+}
+
 
 function restore_test_2()
 {
@@ -130,9 +158,10 @@ function main()
     import_config
 
     #Do not change the order of test case execution
-    restore_test_1
-    verify_restore_test_1
-    #backup_test_1
+    #success restore_test_1
+    #success verify_restore_test_1
+    backup_test_1
+    verify_backup_test_1
     #restore_test_2
     #migrate_test_1
     echo

@@ -1,5 +1,21 @@
+function import_config()
+{
+    echo "[ status ] importing config ( test_config/config.sh )"
+    source test_config/config.sh
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
+}
+
+function get_abs_path_backup_dir()
+{
+    cd $BACKUP_DIR
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+    BACKUP_DIR=`pwd -P`
+}
+
+
 function validate_code()
 {
+    cd $BACKUP_DIR/backup
 	echo
 	echo "[ STATUS ] code validation"
 	echo
@@ -23,6 +39,7 @@ function validate_code()
 
 function validate_data()
 {
+    cd $BACKUP_DIR/backup
 	echo
 	echo "[ STATUS ] data validation"
 	echo
@@ -36,8 +53,9 @@ function validate_data()
 	echo "[ SUCCESS ] data validation"
 }
 
-function validate_db()
+function validate_db_dump()
 {
+    cd $BACKUP_DIR/backup
 	echo 
 	echo "[ STATUS ] db validation"
 	echo 
@@ -62,9 +80,17 @@ function validate_db()
 	echo "[ SUCCESS ] db validation"
 }
 
-validate_code
-echo	
-validate_data
-echo	
-validate_db
-echo	
+function main()
+{
+    import_config
+    get_abs_path_backup_dir
+    validate_code
+    echo	
+    validate_data
+    echo	
+    validate_db_dump
+    echo	
+}
+
+#main function
+main
