@@ -32,7 +32,7 @@ function db_empty_check()
     if [ $table_count -gt 0 ];then
         echo "  [ ERROR ] [ ${LINENO} ] DB is not empty ( table_count : $table_count ), truncate database before restore"
         echo
-        echo "      -> $DB_NAME"
+        echo "     -> $DB_NAME"
         echo
         echo
         exit 1

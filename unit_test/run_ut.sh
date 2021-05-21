@@ -117,19 +117,26 @@ function verify_backup_test_1()
     echo "[ SUCCESS ] verify_backup_test_1()"
 }
 
-
 function restore_test_2()
 {
-	cd sandbox
+    cd $CURRENT_DIR/sandbox
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] restore_test_2"
-	./restore_website $BACKUP_DIR/backup.tar.gz
-
-
+    ./restore_website "$BACKUP_DIR/backup.tar.gz"
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] restore_test_2"
 	cd $CURRENT_DIR
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 }
+
+function verify_restore_test_2()
+{
+    cd $CURRENT_DIR
+    ./test_case_verify_restore_2.sh    
+	[ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ] verify_restore_test_2 failed"; exit 1; }		
+    echo "[ SUCCESS ] verify_restore_test_2()"
+}
+
 
 function migrate_test_1()
 {
@@ -160,9 +167,10 @@ function main()
     #Do not change the order of test case execution
     #success restore_test_1
     #success verify_restore_test_1
-    backup_test_1
-    verify_backup_test_1
-    #restore_test_2
+    #success backup_test_1
+    #success verify_backup_test_1
+    restore_test_2
+    verify_restore_test_2
     #migrate_test_1
     echo
 
