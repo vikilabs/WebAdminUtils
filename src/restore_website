@@ -140,6 +140,29 @@ function import_config()
 
 }
 
+function empty_config_check_old()
+{
+    config_error=0
+
+    echo
+    [ -z $DOMAIN ] && { echo "  [ CONFIG ERROR ] :  DOMAIN" ; config_error=1; }
+    [ -z $DB_NAME ] && { echo "  [ CONFIG ERROR ] :  DB_NAME" ; config_error=1; }
+    [ -z $DB_USERNAME ] && { echo "  [ CONFIG ERROR ] :  DB_USERNAME" ; config_error=1; }
+    [ -z $DB_PASSWORD ] && { echo "  [ CONFIG ERROR ] :  DB_PASSWORD" ; config_error=1; }
+    [ -z $DB_HOST ] && { echo "  [ CONFIG ERROR ] :  DB_HOST" ; config_error=1; }
+    [ -z $DB_PORT ] && { echo "  [ CONFIG ERROR ] :  DB_PORT" ; config_error=1; }
+    [ -z $WEBSITE_ROOT_DIR ] && { echo "  [ CONFIG ERROR ] :  WEBSITE_ROOT_DIR" ; config_error=1; }
+    [ -z $BACKUP_DIR ] && { echo "  [ CONFIG ERROR ] :  BACKUP_DIR" ; config_error=1; }
+    [ -z $LOG_FILE ] && { echo "  [ CONFIG ERROR ] :  LOG_FILE" ; config_error=1; }
+
+    if [ $config_error -eq 1 ]; then
+        echo
+        echo "  [ ERROR ] Fix configuration error and try again ( $SOURCE_PATH/$RESTORE_DIR/restore_config.sh ) "
+        echo
+        exit 1
+   fi
+}
+
 function print_config()
 {
     echo
@@ -199,6 +222,7 @@ function main()
     get_user_confirmation
     extract_backup_archive
     import_config
+    empty_config_check_old
     print_config
     get_abs_path_website_root
     db_empty_check

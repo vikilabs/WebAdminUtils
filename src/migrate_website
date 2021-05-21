@@ -31,6 +31,28 @@ function import_new_config()
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1;}
 }
 
+function empty_config_check_new()
+{
+    config_error=0
+
+    echo
+
+    [ -z $NEW_DOMAIN ] && { echo "  [ CONFIG ERROR ] :  NEW_DOMAIN" ; config_error=1; }
+    [ -z $NEW_DB_NAME ] && { echo "  [ CONFIG ERROR ] :  NEW_DB_NAME" ; config_error=1; }
+    [ -z $NEW_DB_USERNAME ] && { echo "  [ CONFIG ERROR ] :  NEW_DB_USERNAME" ; config_error=1; }
+    [ -z $NEW_DB_PASSWORD ] && { echo "  [ CONFIG ERROR ] :  NEW_DB_PASSWORD" ; config_error=1; }
+    [ -z $NEW_DB_HOST ] && { echo "  [ CONFIG ERROR ] :  NEW_DB_HOST" ; config_error=1; }
+    [ -z $NEW_DB_PORT ] && { echo "  [ CONFIG ERROR ] :  NEW_DB_PORT" ; config_error=1;  }
+    [ -z $NEW_WEBSITE_ROOT_DIR ] && { echo "  [ CONFIG ERROR ] :  NEW_WEBSITE_ROOT_DIR" ; config_error=1; }
+
+    if [ $config_error -eq 1 ]; then
+        echo
+        echo "  [ ERROR ] Fix configuration error and try again ( $CURRENT_DIR/migrate_config.sh ) "
+        echo
+        exit 1
+    fi
+}
+
 function db_empty_check()
 {
     table_count=$(mysql -u$NEW_DB_USERNAME -p$NEW_DB_PASSWORD -h $NEW_DB_HOST -P $NEW_DB_PORT $NEW_DB_NAME -e "SHOW TABLES;" | wc -l)
@@ -145,6 +167,29 @@ function import_old_config()
 
 }
 
+function empty_config_check_old()
+{   
+    config_error=0
+    
+    echo 
+    [ -z $DOMAIN ] && { echo "  [ CONFIG ERROR ] :  DOMAIN" ; config_error=1; } 
+    [ -z $DB_NAME ] && { echo "  [ CONFIG ERROR ] :  DB_NAME" ; config_error=1; }
+    [ -z $DB_USERNAME ] && { echo "  [ CONFIG ERROR ] :  DB_USERNAME" ; config_error=1; }
+    [ -z $DB_PASSWORD ] && { echo "  [ CONFIG ERROR ] :  DB_PASSWORD" ; config_error=1; }
+    [ -z $DB_HOST ] && { echo "  [ CONFIG ERROR ] :  DB_HOST" ; config_error=1; }
+    [ -z $DB_PORT ] && { echo "  [ CONFIG ERROR ] :  DB_PORT" ; config_error=1; } 
+    [ -z $WEBSITE_ROOT_DIR ] && { echo "  [ CONFIG ERROR ] :  WEBSITE_ROOT_DIR" ; config_error=1; }
+    [ -z $BACKUP_DIR ] && { echo "  [ CONFIG ERROR ] :  BACKUP_DIR" ; config_error=1; }
+    [ -z $LOG_FILE ] && { echo "  [ CONFIG ERROR ] :  LOG_FILE" ; config_error=1; }
+    
+    if [ $config_error -eq 1 ]; then
+        echo
+        echo "  [ ERROR ] Fix configuration error and try again ( $SOURCE_PATH/$RESTORE_DIR/restore_config.sh ) "
+        echo 
+        exit 1
+   fi
+}
+
 function print_old_config()
 {
     echo
@@ -221,12 +266,14 @@ function main()
     get_current_dir
     arg_check
     import_new_config
+    empty_config_check_new
     db_empty_check
     dir_empty_check
     validate_input
     get_user_confirmation
     extract_backup_archive
     import_old_config
+    empty_config_check_old
     print_old_config
     print_new_config
     get_abs_path_new_website_root
