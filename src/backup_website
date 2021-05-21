@@ -50,6 +50,34 @@ function empty_config_check()
    fi
 }
 
+function remove_trailing_slash()
+{
+   BACKUP_DIR=`echo ${BACKUP_DIR%/}`
+   BACKUP_DIR=`echo ${BACKUP_DIR%/}`
+   
+   WEBSITE_ROOT_DIR=`echo ${WEBSITE_ROOT_DIR%/}`
+   WEBSITE_ROOT_DIR=`echo ${WEBSITE_ROOT_DIR%/}`
+   
+   DOMAIN=`echo ${DOMAIN%/}`
+   DOMAIN=`echo ${DOMAIN%/}`
+}
+
+function check_whether_backup_dir_inside_webroot()
+{
+    if [[ $BACKUP_DIR =~ $WEBSITE_ROOT_DIR ]]; then
+        echo
+        echo "  [ possible error ] It looks like backup directory should not be inside source directory"
+        echo
+        echo "       -> [ BACKUP_DIR : $BACKUP_DIR ]"
+        echo
+        echo "       -> [ WEBSITE_ROOT_DIR : $WEBSITE_ROOT_DIR ]"
+        echo
+        echo "  [ suggestion  ] Don't keep backup directory inside source directory"
+        echo
+        exit 1
+    fi
+}
+
 function create_backup_dir()
 {
     cd $BACKUP_DIR 2> /dev/null 1>/dev/null
@@ -200,6 +228,8 @@ function main()
     get_timestamp
     import_config
     empty_config_check
+    remove_trailing_slash
+    check_whether_backup_dir_inside_webroot
     get_abs_path_backup_dir
     get_abs_path_web_root
     input_validation

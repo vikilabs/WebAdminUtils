@@ -163,6 +163,18 @@ function empty_config_check_old()
    fi
 }
 
+function remove_trailing_slash_old()
+{
+   BACKUP_DIR=`echo ${BACKUP_DIR%/}`
+   BACKUP_DIR=`echo ${BACKUP_DIR%/}`
+   
+   WEBSITE_ROOT_DIR=`echo ${WEBSITE_ROOT_DIR%/}`
+   WEBSITE_ROOT_DIR=`echo ${WEBSITE_ROOT_DIR%/}`
+   
+   DOMAIN=`echo ${DOMAIN%/}`
+   DOMAIN=`echo ${DOMAIN%/}`
+}
+
 function print_config()
 {
     echo
@@ -223,6 +235,7 @@ function main()
     extract_backup_archive
     import_config
     empty_config_check_old
+    remove_trailing_slash_old
     print_config
     get_abs_path_website_root
     db_empty_check

@@ -53,6 +53,15 @@ function empty_config_check_new()
     fi
 }
 
+function remove_trailing_slash_new()
+{
+   NEW_WEBSITE_ROOT_DIR=`echo ${NEW_WEBSITE_ROOT_DIR%/}`
+   NEW_WEBSITE_ROOT_DIR=`echo ${NEW_WEBSITE_ROOT_DIR%/}`
+   
+   NEW_DOMAIN=`echo ${NEW_DOMAIN%/}`
+   NEW_DOMAIN=`echo ${NEW_DOMAIN%/}`
+}
+
 function db_empty_check()
 {
     table_count=$(mysql -u$NEW_DB_USERNAME -p$NEW_DB_PASSWORD -h $NEW_DB_HOST -P $NEW_DB_PORT $NEW_DB_NAME -e "SHOW TABLES;" | wc -l)
@@ -190,6 +199,18 @@ function empty_config_check_old()
    fi
 }
 
+function remove_trailing_slash_old()
+{
+   BACKUP_DIR=`echo ${BACKUP_DIR%/}`
+   BACKUP_DIR=`echo ${BACKUP_DIR%/}`
+   
+   WEBSITE_ROOT_DIR=`echo ${WEBSITE_ROOT_DIR%/}`
+   WEBSITE_ROOT_DIR=`echo ${WEBSITE_ROOT_DIR%/}`
+   
+   DOMAIN=`echo ${DOMAIN%/}`
+   DOMAIN=`echo ${DOMAIN%/}`
+}
+
 function print_old_config()
 {
     echo
@@ -267,6 +288,7 @@ function main()
     arg_check
     import_new_config
     empty_config_check_new
+    remove_trailing_slash_new
     db_empty_check
     dir_empty_check
     validate_input
@@ -274,6 +296,7 @@ function main()
     extract_backup_archive
     import_old_config
     empty_config_check_old
+    remove_trailing_slash_old
     print_old_config
     print_new_config
     get_abs_path_new_website_root
