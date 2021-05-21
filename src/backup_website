@@ -40,7 +40,7 @@ function empty_config_check()
     [ -z $DB_PORT ] && { echo "  [ CONFIG ERROR ] :  DB_PORT" ; config_error=1; }
     [ -z $WEBSITE_ROOT_DIR ] && { echo "  [ CONFIG ERROR ] :  WEBSITE_ROOT_DIR" ; config_error=1; }
     [ -z $BACKUP_DIR ] && { echo "  [ CONFIG ERROR ] :  BACKUP_DIR" ; config_error=1; }
-    [ -z $LOG_FILE ] && { echo "  [ CONFIG ERROR ] :  LOG_FILE" ; config_error=1; }
+    [[ -z $LOG_FILE ]] && { echo "  [ CONFIG ERROR ] :  LOG_FILE" ; config_error=1; }
 
     if [ $config_error -eq 1 ]; then
         echo
