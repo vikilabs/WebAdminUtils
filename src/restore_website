@@ -27,7 +27,11 @@ function arg_check()
 
 function db_empty_check()
 {
-    table_count=$(mysql -u$DB_USERNAME -p$DB_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)
+    if [[ -z $MYSQL_ADMIN_USERNAME ]]; then
+        table_count=$(mysql -u$DB_USERNAME -p$DB_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)
+    else
+        table_count=$(mysql -u$MYSQL_ADMIN_USERNAME -p$MYSQL_ADMIN_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)
+    fi
 
     if [ $table_count -gt 0 ];then
         echo "  [ ERROR ] [ ${LINENO} ] DB is not empty ( table_count : $table_count ), truncate database before restore"
@@ -227,7 +231,11 @@ function get_abs_path_website_root()
 function importe_database()
 {
     cd $SOURCE_PATH
-    mysql -u$DB_USERNAME  -p$DB_PASSWORD $DB_NAME < ${RESTORE_DIR}/db/database.sql
+    if [[ -z $MYSQL_ADMIN_USERNAME ]]; then
+        mysql -u$DB_USERNAME  -p$DB_PASSWORD $DB_NAME < ${RESTORE_DIR}/db/database.sql
+    else
+        mysql -u$MYSQL_ADMIN_USERNAME  -p$MYSQL_ADMIN_PASSWORD $DB_NAME < ${RESTORE_DIR}/db/database.sql
+    fi
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Database Import Failed"; exit 1; }
 }
 

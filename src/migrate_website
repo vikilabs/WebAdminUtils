@@ -64,8 +64,12 @@ function remove_trailing_slash_new()
 
 function db_empty_check()
 {
-    table_count=$(mysql -u$NEW_DB_USERNAME -p$NEW_DB_PASSWORD -h $NEW_DB_HOST -P $NEW_DB_PORT $NEW_DB_NAME -e "SHOW TABLES;" | wc -l)
-
+    if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
+        table_count=$(mysql -u$NEW_DB_USERNAME -p$NEW_DB_PASSWORD -h $NEW_DB_HOST -P $NEW_DB_PORT $NEW_DB_NAME -e "SHOW TABLES;" | wc -l)
+    else
+        table_count=$(mysql -u$NEW_MYSQL_ADMIN_USERNAME -p$NEW_MYSQL_ADMIN_PASSWORD -h $NEW_DB_HOST -P $NEW_DB_PORT $NEW_DB_NAME -e "SHOW TABLES;" | wc -l)
+    fi
+    
     if [ $table_count -gt 0 ];then
         echo "  [ ERROR ] [ ${LINENO} ] DB is not empty ( table_count : $table_count ), truncate database before migrating"
         echo
@@ -280,7 +284,12 @@ function update_new_config()
 function importe_database()
 {
     cd $SOURCE_PATH
-    mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD $NEW_DB_NAME < ${RESTORE_DIR}/db/database.sql
+    if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
+        mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD $NEW_DB_NAME < ${RESTORE_DIR}/db/database.sql
+    else
+        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD $NEW_DB_NAME < ${RESTORE_DIR}/db/database.sql
+    fi
+
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Database Import Failed"; exit 1; }
 }
 

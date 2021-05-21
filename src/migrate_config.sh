@@ -12,5 +12,10 @@ NEW_DB_PASSWORD='pass'
 NEW_DB_HOST='localhost'
 NEW_DB_PORT='3306'
 
+#OPTIONAL CONFIG [ SPECIAL PREVILAGES ]
+NEW_MYSQL_ADMIN_USERNAME=''
+NEW_MYSQL_ADMIN_PASSWORD=''
+
+
 #Do not keep the path inside quotes 
 NEW_WEBSITE_ROOT_DIR=~/public_html/

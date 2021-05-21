@@ -14,6 +14,11 @@ DB_PASSWORD='Test$DB123'
 DB_HOST='localhost'
 DB_PORT='3306'
 
+#OPTIONAL CONFIG [ SPECIAL PREVILAGES ]
+
+MYSQL_ADMIN_USERNAME=''
+MYSQL_ADMIN_PASSWORD=''
+
 #website root directory ( don't keep / at the end)
 #Do not use quotes
 WEBSITE_ROOT_DIR=~/public_html/

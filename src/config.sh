@@ -19,5 +19,10 @@ WEBSITE_ROOT_DIR=~/public_html
 #Do not use quotes
 BACKUP_DIR=~/backup
 
+#OPTIONAL CONFIG [ SPECIAL PREVILAGES ]
+
+MYSQL_ADMIN_USERNAME=''
+MYSQL_ADMIN_PASSWORD=''
+
 #Use this config in double quotes
 LOG_FILE="${BACKUP_DIR}/${DOMAIN}_backup.log"
