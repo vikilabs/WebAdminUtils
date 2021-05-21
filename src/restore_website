@@ -140,6 +140,26 @@ function import_config()
 
 }
 
+function check_whether_webroot_dir_inside_backup_dir()
+{
+    # Example:
+    #   
+    #   if (/home/backup/website) inside ( /home/backup ) : TRUE 
+    #   
+    if [[ $WEBSITE_ROOT_DIR =~ "$SOURCE_PATH/$RESTORE_DIR" ]]; then
+        echo
+        echo "  [ possible error ] It looks like new website root directory is inside source directory"
+        echo
+        echo "       -> [ SOURCE_DIR : $SOURCE_PATH/$RESTORE_DIR ]"
+        echo
+        echo "       -> [ WEBSITE_ROOT_DIR : $WEBSITE_ROOT_DIR ]"
+        echo
+        echo "  [ fix ] move tar file ( $SOURCE_PATH/$SOURCE_FILE ) to some other directory and try again"
+        echo
+        exit 1
+    fi  
+} 
+
 function empty_config_check_old()
 {
     config_error=0
@@ -234,6 +254,7 @@ function main()
     get_user_confirmation
     extract_backup_archive
     import_config
+    check_whether_webroot_dir_inside_backup_dir
     empty_config_check_old
     remove_trailing_slash_old
     print_config

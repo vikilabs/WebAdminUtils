@@ -64,15 +64,20 @@ function remove_trailing_slash()
 
 function check_whether_backup_dir_inside_webroot()
 {
+    # Example:
+    #   
+    #   if (/home/website) inside ( /home/website/backup ) : TRUE 
+    #   
+ 
     if [[ $BACKUP_DIR =~ $WEBSITE_ROOT_DIR ]]; then
         echo
-        echo "  [ possible error ] It looks like backup directory should not be inside source directory"
+        echo "  [ possible error ] It looks like backup directory is inside website root"
         echo
         echo "       -> [ BACKUP_DIR : $BACKUP_DIR ]"
         echo
         echo "       -> [ WEBSITE_ROOT_DIR : $WEBSITE_ROOT_DIR ]"
         echo
-        echo "  [ suggestion  ] Don't keep backup directory inside source directory"
+        echo "  [ suggestion  ] Don't keep backup directory inside website root directory"
         echo
         exit 1
     fi
