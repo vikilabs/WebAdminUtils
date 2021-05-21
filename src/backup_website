@@ -177,7 +177,7 @@ function export_website_database()
 #Export website code and data
 function export_website_data()
 {
-    cp -arf $WEBSITE_ROOT_DIR/* $BACKUP_DIR/$BACKUP_LABEL/code/
+    cp -arf $WEBSITE_ROOT_DIR/. $BACKUP_DIR/$BACKUP_LABEL/code/
     [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
 }
 
@@ -224,6 +224,11 @@ function generate_backup()
     #######################  remove $BACKUP_LABEL directory ###################
     rm -rf $BACKUP_LABEL
     [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+
+    echo
+    echo "  [ SUCCESS ] website backup ( $BACKUP_DIR/${BACKUP_LABEL}.tar.gz )"
+    echo "  [ SUCCESS ] website backup ( $BACKUP_DIR/${BACKUP_LABEL}.tar.gz )" >> $LOG_FILE
+    echo
 }
 
 
