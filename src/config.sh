@@ -25,4 +25,4 @@ MYSQL_ADMIN_USERNAME=''
 MYSQL_ADMIN_PASSWORD=''
 
 #Use this config in double quotes
-LOG_FILE="${BACKUP_DIR}/${DOMAIN}_backup.log"
+LOG_FILE="/tmp/backup.example.com.log"

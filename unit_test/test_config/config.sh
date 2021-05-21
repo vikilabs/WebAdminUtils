@@ -28,4 +28,4 @@ WEBSITE_ROOT_DIR=~/public_html/
 BACKUP_DIR=~/test_backup
 
 #Use this config in double quotes
-LOG_FILE="${BACKUP_DIR}/${DOMAIN}_backup.log"
+LOG_FILE="/tmp/backup.testa.vikilabs.org.log"
