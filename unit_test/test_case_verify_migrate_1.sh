@@ -61,38 +61,7 @@ function validate_credentials()
     grep "$NEW_DB_PASSWORD" -nr . 1> /dev/null 2> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 
-
-    cd $NEW_WEBSITE_ROOT_DIR/db
-    grep "$NEW_DOMAIN" -nr . 1> /dev/null 2> /dev/null
-	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    grep "$NEW_DB_NAME" -nr . 1> /dev/null 2> /dev/null
-	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    grep "$NEW_DB_USERNAME" -nr . 1> /dev/null 2> /dev/null
-	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    grep "$NEW_DB_PASSWORD" -nr . 1> /dev/null 2> /dev/null
-	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-
-
     #Old credentials should not exist [ no need to do this, most times old and new details are 90% same]
-    #cd $NEW_WEBSITE_ROOT_DIR/code
-    #grep "$DOMAIN" -nr . 1> /dev/null
-	#[ $? -eq 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    #grep "$DB_NAME" -nr . 1> /dev/null
-	#[ $? -eq 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    #grep "$DB_USERNAME" -nr . 1> /dev/null
-	#[ $? -eq 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    #grep "$DB_PASSWORD" -nr . 1> /dev/null
-	#[ $? -eq 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-
-    #cd $NEW_WEBSITE_ROOT_DIR/db
-    #grep "$DOMAIN" -nr . 1> /dev/null
-	#[ $? -eq 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    #grep "$DB_NAME" -nr . 1> /dev/null
-	#[ $? -eq 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    #grep "$DB_USERNAME" -nr . 1> /dev/null
-	#[ $? -eq 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    #grep "$DB_PASSWORD" -nr . 1> /dev/null
-	#[ $? -eq 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 
     echo "[ success ] credentials validation"
 }

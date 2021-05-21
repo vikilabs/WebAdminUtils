@@ -218,7 +218,7 @@ function generate_backup()
     cd $BACKUP_DIR
     [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
 
-    tar -czvf "${BACKUP_LABEL}.tar.gz" $BACKUP_LABEL
+    tar -czvf "${BACKUP_LABEL}.tar.gz" $BACKUP_LABEL 1> /dev/null
     [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
 
     #######################  remove $BACKUP_LABEL directory ###################

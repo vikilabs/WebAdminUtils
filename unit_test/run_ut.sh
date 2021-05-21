@@ -58,7 +58,7 @@ function restore_test_1()
     cd $CURRENT_DIR/sandbox
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] restore_test_1"
-	./restore_website "../test_website.tar.gz"
+    { echo "YES"; } | ./restore_website "../test_website.tar.gz" 1> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] restore_test_1"
 	cd $CURRENT_DIR
@@ -85,7 +85,7 @@ function backup_test_1()
     cd $CURRENT_DIR/sandbox
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	
-	./backup_website 
+	./backup_website 1> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 
     
@@ -122,7 +122,7 @@ function restore_test_2()
     cd $CURRENT_DIR/sandbox
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] restore_test_2"
-    ./restore_website "$BACKUP_DIR/backup.tar.gz"
+    { echo "YES"; } | ./restore_website "$BACKUP_DIR/backup.tar.gz" 1> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] restore_test_2"
 	cd $CURRENT_DIR
@@ -143,7 +143,7 @@ function migrate_test_1()
     cd $CURRENT_DIR/sandbox
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] migrate_test_1"
-    ./migrate_website "$BACKUP_DIR/backup.tar.gz"
+    { echo "YES"; } | ./migrate_website "$BACKUP_DIR/backup.tar.gz" 1> /dev/null  
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] migrate_test_1"
 	cd $CURRENT_DIR
@@ -201,6 +201,9 @@ function main()
     verify_migrate_test_1
     echo
 
+    echo "[ ALL TEST CASES EXECUTED SUCCESSFULLY : APPROVED FOR RELEASE ]"
+
+    echo
     cleanup
 }
 
