@@ -7,28 +7,35 @@
 #		Licence : MIT
 
 
-INPUT=$1
-
 function get_current_dir()
 {
     CURRENT_DIR=`pwd -P`
 }
 
-function arg_check()
+#Get Website Source Path
+function set_source_path()
 {
-    if [ -z "$INPUT" ]; then
-        echo "  [ ERROR ] backup file name missing "
-        echo
-        echo "  [ EXAMPLE ] ./migrate_website backup.tar.gz"
-        echo
-        exit 1
-    fi
+    cd $CURRENT_DIR
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
+    cd ..
+    SOURCE_PATH=`pwd -P`
 }
+
 
 function import_new_config()
 {
-    source $CURRENT_DIR/migrate_config.sh
+    source $CURRENT_DIR/config.sh
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1;}
+    
+    NEW_DOMAIN=$DOMAIN
+    NEW_DB_NAME=$DB_NAME
+    NEW_DB_USERNAME=$DB_USERNAME
+    NEW_DB_PASSWORD=$DB_PASSWORD
+    NEW_DB_HOST=$DB_HOST
+    NEW_DB_PORT=$DB_PORT
+    NEW_WEBSITE_ROOT_DIR=$WEBSITE_ROOT_DIR
+    NEW_MYSQL_ADMIN_USERNAME=$MYSQL_ADMIN_USERNAME
+    NEW_MYSQL_ADMIN_PASSWORD=$MYSQL_ADMIN_PASSWORD
 }
 
 function empty_config_check_new()
@@ -47,7 +54,7 @@ function empty_config_check_new()
 
     if [ $config_error -eq 1 ]; then
         echo
-        echo "  [ ERROR ] Fix configuration error and try again ( $CURRENT_DIR/migrate_config.sh ) "
+        echo "  [ ERROR ] Website Restore Failed, Invalid Configuration( $CURRENT_DIR/config.sh ) "
         echo
         exit 1
     fi
@@ -93,109 +100,29 @@ function dir_empty_check()
     fi
 }
 
-function validate_input()
-{
-
-    echo
-    SOURCE_FILE=`basename $INPUT`
-    SOURCE_PATH=`dirname $INPUT`
-
-    # GET ABSOLUTE PATH 
-    cd $SOURCE_PATH
-    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
-    SOURCE_PATH=`pwd -P`
-
-    cd $SOURCE_PATH
-    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
-
-    # EXTRACT FILENAME AND PATH FROM INPUT 
-
-    STRIP_EXTN1="${SOURCE_FILE%.*}"
-    EXTN1="${SOURCE_FILE##*.}"
-
-    STRIP_EXTN2="${STRIP_EXTN1%.*}"
-    EXTN2="${STRIP_EXTN1##*.}"
-
-    RESTORE_DIR=$STRIP_EXTN2
-
-
-    #echo " EXTENSION 1          : " $EXTN1
-    #echo " EXTENSION 2          : " $EXTN2
-    #echo " EXTENSION 1 STRIPPED : " $STRIP_EXTN1
-    #echo " EXTENSION 2 STRIPPED : " $STRIP_EXTN2
-    #echo " RESTORE DIR          : " $RESTORE_DIR
-
-
-    if [ "$EXTN1" != "gz" ]; then
-        echo "  [ ERROR ] invalid backup file name ( file name should end with .tar.gz ) "
-        echo
-        exit 1
-    fi
-
-    if [ "$EXTN2" != "tar" ]; then
-        echo "  [ ERROR ] invalid backup file name ( file name should end with .tar.gz ) "
-        echo
-        exit 1
-    fi
-}
-
-function check_whether_webroot_dir_inside_backup_dir()
+function check_whether_webroot_dir_inside_source_dir()
 {
     # Example:
     #   
     #   if (/home/backup/website) inside ( /home/backup ) : TRUE 
     #   
-    if [[ $NEW_WEBSITE_ROOT_DIR =~ "$SOURCE_PATH/$RESTORE_DIR" ]]; then
+    if [[ $NEW_WEBSITE_ROOT_DIR =~ "$SOURCE_PATH" ]]; then
         echo
         echo "  [ possible error ] It looks like new website root directory is inside source directory"
         echo
-        echo "       -> [ SOURCE_DIR : $SOURCE_PATH/$RESTORE_DIR ]"
+        echo "       -> [ SOURCE_DIR : $SOURCE_PATH ]"
         echo
         echo "       -> [ NEW_WEBSITE_ROOT_DIR : $NEW_WEBSITE_ROOT_DIR ]"
         echo
-        echo "  [ fix ] move tar file ( $SOURCE_PATH/$SOURCE_FILE ) to some other directory and try again"
         echo
         exit 1
     fi  
 } 
 
-function get_user_confirmation()
-{
-
-    while true; do
-        read -p "  Do you wish to migrate this website from backup ( YES / NO )?  " user_input
-        echo
-        case $user_input in
-            [YES]* ) echo "  YES : Migrate Initiated"; break;;
-            * ) echo "  NO ( DEFAULT )  : Aborting Migrate Operation";echo;exit;;
-        esac
-    done
-    echo
-
-}
-
-function extract_backup_archive()
-{
-    echo
-    echo "  Extracting backup file : $SOURCE_FILE"
-    echo
-    # Enter backup directory
-    cd $SOURCE_PATH
-    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
-
-    # Remove Old Restore Folder ( if any )
-    rm -rf $RESTORE_DIR
-
-    # Extract backup archive
-    tar -zxvf $SOURCE_FILE 1> /dev/null
-    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
-    echo
-}
-
 #Old Configuration
 function import_old_config()
 {
-    source $SOURCE_PATH/$RESTORE_DIR/restore_config.sh
+    source $CURRENT_DIR/.config_old.sh
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
 
 }
@@ -217,7 +144,7 @@ function empty_config_check_old()
     
     if [ $config_error -eq 1 ]; then
         echo
-        echo "  [ ERROR ] Fix configuration error and try again ( $SOURCE_PATH/$RESTORE_DIR/restore_config.sh ) "
+        echo "  [ ERROR ] Website Restore Failed, Invalid Old Configuration( $CURRENT_DIR/.config_old.sh ) "
         echo 
         exit 1
    fi
@@ -273,21 +200,21 @@ function get_abs_path_new_website_root()
 function update_new_config()
 {
     cd $SOURCE_PATH
-    find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_NAME/$NEW_DB_NAME/g" {} \;
-    find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_USERNAME/$NEW_DB_USERNAME/g" {} \;
-    find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_PASSWORD/$NEW_DB_PASSWORD/g" {} \;
-    find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_HOST/$NEW_DB_HOST/g" {} \;
-    find $RESTORE_DIR -type f -exec sed -i -e "s/$DB_PORT/$NEW_DB_PORT/g" {} \;
-    find $RESTORE_DIR -type f -exec sed -i -e "s/$DOMAIN/$NEW_DOMAIN/g" {} \;
+    find . -type f -exec sed -i -e "s/$DB_NAME/$NEW_DB_NAME/g" {} \;
+    find . -type f -exec sed -i -e "s/$DB_USERNAME/$NEW_DB_USERNAME/g" {} \;
+    find . -type f -exec sed -i -e "s/$DB_PASSWORD/$NEW_DB_PASSWORD/g" {} \;
+    find . -type f -exec sed -i -e "s/$DB_HOST/$NEW_DB_HOST/g" {} \;
+    find . -type f -exec sed -i -e "s/$DB_PORT/$NEW_DB_PORT/g" {} \;
+    find . -type f -exec sed -i -e "s/$DOMAIN/$NEW_DOMAIN/g" {} \;
 }
 
 function importe_database()
 {
     cd $SOURCE_PATH
     if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
-        mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD $NEW_DB_NAME < ${RESTORE_DIR}/db/database.sql
+        mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD $NEW_DB_NAME < db/database.sql
     else
-        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD $NEW_DB_NAME < ${RESTORE_DIR}/db/database.sql
+        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD $NEW_DB_NAME < db/database.sql
     fi
 
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Database Import Failed"; exit 1; }
@@ -296,7 +223,7 @@ function importe_database()
 function importe_code()
 {
     cd $SOURCE_PATH
-    mv ${RESTORE_DIR}/code/* ${NEW_WEBSITE_ROOT_DIR}/
+    mv code/* ${NEW_WEBSITE_ROOT_DIR}/
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Website copy failed"; exit 1; }
 }
 
@@ -311,19 +238,16 @@ function migration_success()
 function main()
 {
     get_current_dir
-    arg_check
+    set_source_path
     import_new_config
+    import_old_config
     empty_config_check_new
+    empty_config_check_old
     remove_trailing_slash_new
+    remove_trailing_slash_old
     db_empty_check
     dir_empty_check
-    validate_input
-    check_whether_webroot_dir_inside_backup_dir
-    get_user_confirmation
-    extract_backup_archive
-    import_old_config
-    empty_config_check_old
-    remove_trailing_slash_old
+    check_whether_webroot_dir_inside_source_dir
     print_old_config
     print_new_config
     get_abs_path_new_website_root
