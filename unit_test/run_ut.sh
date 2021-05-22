@@ -13,14 +13,13 @@ function init_sandbox()
     mkdir -p sandbox 1> /dev/null 2> /dev/null
     rm -rf sandbox/* 1> /dev/null 2> /dev/null
 
-    cp ../src/backup_website sandbox/
+    cp test_website.tar.gz sandbox/
     [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    cp ../src/install_website sandbox/
-    [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    cp ../src/migrate_website sandbox/
-    [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    cp ../src/restore_website sandbox/
-    [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+
+    cd sandbox/
+    tar -zxvf test_website.tar.gz 1> /dev/null
+    cd ../
+
     echo "[ SUCCESS ] init_sandbox"
 }
 
@@ -30,7 +29,7 @@ function copy_test_config()
 
     cd $CURRENT_DIR
 
-    cp test_config/* sandbox/ 
+    cp test_config/config.sh sandbox/ 
     [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }
 
     echo "[ SUCCESS ] copy test config"
@@ -58,7 +57,7 @@ function restore_test_1()
     cd $CURRENT_DIR/sandbox
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] restore_test_1"
-    { echo "YES"; } | ./restore_website "../test_website.tar.gz" 1> /dev/null
+    ./restore_website 1> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] restore_test_1"
 	cd $CURRENT_DIR
@@ -122,7 +121,7 @@ function restore_test_2()
     cd $CURRENT_DIR/sandbox
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] restore_test_2"
-    { echo "YES"; } | ./restore_website "$BACKUP_DIR/backup.tar.gz" 1> /dev/null
+    ./restore_website 1> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] restore_test_2"
 	cd $CURRENT_DIR
@@ -143,7 +142,7 @@ function migrate_test_1()
     cd $CURRENT_DIR/sandbox
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] migrate_test_1"
-    { echo "YES"; } | ./migrate_website "$BACKUP_DIR/backup.tar.gz" 1> /dev/null  
+    ./migrate_website 1> /dev/null  
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] migrate_test_1"
 	cd $CURRENT_DIR
@@ -174,6 +173,11 @@ function cleanup()
 	cd $CURRENT_DIR
     rm -rf sandbox
     rm -rf test_website
+}
+
+function extract_backup_base()
+{
+
 }
 
 function main()
