@@ -1,5 +1,5 @@
-rm -rf webadmin_scripts
-mkdir webadmin_scripts
-cp -rf ../src/* webadmin_scripts/
-tar -czvf webadmin_scripts.tar.gz webadmin_scripts
-rm -rf webadmin_scripts
+rm -rf WebAdminUtils
+mkdir WebAdminUtils
+cp -rf ../src/* WebAdminUtils/
+tar -czvf WebAdminUtils.tar.gz WebAdminUtils
+rm -rf WebAdminUtils

@@ -13,15 +13,14 @@ Set of essential scripts to manage a website.
 ## Quick Install
 
 
-	wget https://github.com/vikilabs/web_admin_scripts/blob/master/tarball/webadmin_scripts.tar.gz?raw=true -O script.tar.gz; tar -zxvf script.tar.gz;rm script.tar.gz; cd webadmin_scripts;
+	wget https://github.com/vikilabs/WebAdminUtils/blob/master/tarball/WebAdminUtils.tar.gz?raw=true -O script.tar.gz; tar -zxvf script.tar.gz;rm script.tar.gz; cd WebAdminUtils;
 
+## Tested Linux Servers
 
+    - Ubuntu 16.04
 
 ## Tested Hosting Servers
 
     - Hostinger 
 
-## Tested Linux Servers
-
-    - Ubuntu 16.04
-    
+   
