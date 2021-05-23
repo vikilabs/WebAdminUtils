@@ -51,7 +51,7 @@ function restore_test_1()
     cd $CURRENT_DIR/sandbox/test_website/WebAdminUtils/
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] restore_test_1"
-    ./restore_website 1> /dev/null
+    ./restore_website
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] restore_test_1"
 	cd $CURRENT_DIR
@@ -73,6 +73,11 @@ function post_backup_setup()
     tar -zxvf *.tar.gz
     rm *.tar.gz
     mv * backup
+    cd backup
+    cd WebAdminUtils
+    cp /tmp/config.sh config.sh
+    cp /tmp/.config_old.sh .config_old.sh 
+    cd ../..
     tar -czvf backup.tar.gz backup
     rm -rf backup
 }
@@ -88,6 +93,9 @@ function backup_test_1()
 
     cd $CURRENT_DIR/sandbox/test_website/WebAdminUtils/
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }
+
+    cp config.sh /tmp/config.sh
+    cp .config_old.sh /tmp/.config_old.sh
 
 	./backup_website 1> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
@@ -156,13 +164,15 @@ function migrate_test_1()
     cd $BACKUP_DIR
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 
+    rm -rf backup 1> /dev/null 2> /dev/null
+
     tar -zxvf backup.tar.gz 1> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 
     cd backup/WebAdminUtils
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 
-    ./migrate_website 1> /dev/null  
+    ./migrate_website   
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] migrate_test_1"
 	cd $CURRENT_DIR
@@ -210,10 +220,6 @@ function main()
     backup_test_1
     post_backup_setup
     verify_backup_test_1
-    
-    clear_website_and_db
-    restore_test_2
-    verify_restore_test_2
     
     clear_website_and_db
     migrate_test_1

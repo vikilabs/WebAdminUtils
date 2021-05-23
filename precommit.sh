@@ -19,8 +19,8 @@ tar -zxvf test_website.tar.gz 1> /dev/null
 rm test_website.tar.gz
 mkdir -p test_website/WebAdminUtils 1> /dev/null 2> /dev/null
 cp ../src/* test_website/WebAdminUtils/
-cp test_config/config.sh test_website/WebAdminUtils/.config_old.sh
-cp test_config/migrate_config.sh test_website/WebAdminUtils/config.sh
+cp -rf test_config/config.sh test_website/WebAdminUtils/.config_old.sh
+cp -rf test_config/migrate_config.sh test_website/WebAdminUtils/config.sh
 tar -czvf test_website.tar.gz test_website 1> /dev/null
 
 rm -rf test_website
