@@ -1,23 +1,12 @@
 function import_config_new()
 {
-    echo "[ status ] importing config ( test_config/migrate_config.sh )"    
-    source test_config/migrate_config.sh
+    echo "[ status ] importing config ( sandbox/test_website/WebAdminUtils/.config_old.sh )"
+    source sandbox/test_website/WebAdminUtils/config.sh
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
 }
-
-function import_config()
-{
-    echo "[ status ] importing config ( test_config/config.sh )"
-    source test_config/config.sh
-    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
-}
-
 
 function get_abs_path_backup_dir()
 {
-    #create backup directory
-    mkdir -p $BACKUP_DIR 1> /dev/null 2>/dev/null
-
     cd $BACKUP_DIR
     [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
     BACKUP_DIR=`pwd -P`
@@ -48,17 +37,17 @@ function validate_credentials()
     echo "[ status ] credentials validation"
 
     #New credentials should exist
-    cd $NEW_WEBSITE_ROOT_DIR/code
+    cd $WEBSITE_ROOT_DIR/code
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
     
-    grep "$NEW_DOMAIN" -nr . 1> /dev/null 2> /dev/null
+    grep "$DOMAIN" -nr . 1> /dev/null 2> /dev/null
     [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 
-    grep "$NEW_DB_NAME" -nr . 1> /dev/null 2> /dev/null
+    grep "$DB_NAME" -nr . 1> /dev/null 2> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    grep "$NEW_DB_USERNAME" -nr . 1> /dev/null 2> /dev/null
+    grep "$DB_USERNAME" -nr . 1> /dev/null 2> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-    grep "$NEW_DB_PASSWORD" -nr . 1> /dev/null 2> /dev/null
+    grep "$DB_PASSWORD" -nr . 1> /dev/null 2> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 
     #Old credentials should not exist [ no need to do this, most times old and new details are 90% same]
@@ -68,7 +57,7 @@ function validate_credentials()
 
 function validate_code()
 {
-	cd $NEW_WEBSITE_ROOT_DIR
+	cd $WEBSITE_ROOT_DIR
 	echo
 	echo "[ STATUS ] code validation"
 	echo
@@ -92,7 +81,7 @@ function validate_code()
 
 function validate_data()
 {
-	cd $NEW_WEBSITE_ROOT_DIR
+	cd $WEBSITE_ROOT_DIR
 	echo
 	echo "[ STATUS ] data validation"
 	echo
@@ -129,11 +118,7 @@ function db_record_validation(){
 function main()
 {
     import_config_new
-    import_config
     get_abs_path_backup_dir
-    extract_backup_website
-    echo	
-    import_config_old
     echo
     validate_credentials
     echo

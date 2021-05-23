@@ -1,19 +1,7 @@
-function extract_test_website()
-{
-    echo "[ status ] extracting test_website.tar.gz"
-    
-    rm -rf test_website 1> /dev/null
-
-    # Extract backup archive
-    tar -zxvf test_website.tar.gz 1> /dev/null
-    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
-    echo
-}
-
 function import_config_old()
 {
-    echo "[ status ] importing config ( test_website/restore_config.sh )"
-    source test_website/restore_config.sh
+    echo "[ status ] importing config ( sandbox/test_website/WebAdminUtils/.config_old.sh )"
+    source sandbox/test_website/WebAdminUtils/.config_old.sh
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
 }
 
@@ -79,8 +67,6 @@ function db_record_validation(){
 
 function main()
 {
-    extract_test_website
-    echo	
     import_config_old
     echo	
     validate_code

@@ -66,6 +66,17 @@ function verify_restore_test_1()
     echo "[ SUCCESS ] verify_restore_test_1()"
 }
 
+function post_backup_setup()
+{
+    cd $BACKUP_DIR
+    rm *.log
+    tar -zxvf *.tar.gz
+    rm *.tar.gz
+    mv * backup
+    tar -czvf backup.tar.gz backup
+    rm -rf backup
+}
+
 function backup_test_1()
 {
 	echo "[ STATUS  ] backup_test_1"
@@ -75,9 +86,9 @@ function backup_test_1()
     #Delete any stale contents in backup directory
     rm -rf $BACKUP_DIR/*  1> /dev/null 2>/dev/null
 
-    cd $CURRENT_DIR/sandbox
-	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
-	
+    cd $CURRENT_DIR/sandbox/test_website/WebAdminUtils/
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }
+
 	./backup_website 1> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 
@@ -112,9 +123,16 @@ function verify_backup_test_1()
 
 function restore_test_2()
 {
-    cd $CURRENT_DIR/sandbox/test_website/WebAdminUtils/
-	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] restore_test_2"
+    cd $BACKUP_DIR
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+
+    tar -zxvf backup.tar.gz 1> /dev/null
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+
+    cd backup/WebAdminUtils
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+
     ./restore_website 1> /dev/null
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] restore_test_2"
@@ -133,9 +151,17 @@ function verify_restore_test_2()
 
 function migrate_test_1()
 {
-    cd $CURRENT_DIR/sandbox/test_website/WebAdminUtils/
-	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] migrate_test_1"
+    
+    cd $BACKUP_DIR
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+
+    tar -zxvf backup.tar.gz 1> /dev/null
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+
+    cd backup/WebAdminUtils
+	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
+
     ./migrate_website 1> /dev/null  
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] migrate_test_1"
@@ -169,11 +195,6 @@ function cleanup()
     rm -rf test_website
 }
 
-function extract_backup_base()
-{
-
-}
-
 function main()
 {
     echo
@@ -187,6 +208,7 @@ function main()
     verify_restore_test_1
 
     backup_test_1
+    post_backup_setup
     verify_backup_test_1
     
     clear_website_and_db

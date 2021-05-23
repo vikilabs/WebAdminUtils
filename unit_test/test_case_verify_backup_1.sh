@@ -1,7 +1,8 @@
 function import_config()
 {
-    echo "[ status ] importing config ( test_config/config.sh )"
-    source test_config/config.sh
+    echo "[ status ] importing config ( sandbox/test_website/WebAdminUtils/.config_old.sh )"
+    source sandbox/test_website/WebAdminUtils/.config_old.sh
+ 
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
 }
 
@@ -12,6 +13,11 @@ function get_abs_path_backup_dir()
     BACKUP_DIR=`pwd -P`
 }
 
+function extract_backup()
+{
+    cd $BACKUP_DIR
+    tar -zxvf backup.tar.gz
+}
 
 function validate_code()
 {
@@ -84,6 +90,7 @@ function main()
 {
     import_config
     get_abs_path_backup_dir
+    extract_backup
     validate_code
     echo	
     validate_data

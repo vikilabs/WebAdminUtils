@@ -1,38 +1,14 @@
-function import_config()
-{
-    echo "[ status ] importing config ( test_config/config.sh )"
-    source test_config/config.sh
-    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
-}
-
 function get_abs_path_backup_dir()
 {
-    #create backup directory
-    mkdir -p $BACKUP_DIR 1> /dev/null 2>/dev/null
-
     cd $BACKUP_DIR
     [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
     BACKUP_DIR=`pwd -P`
 }
 
-function extract_backup_website()
-{
-    echo "[ status ] extracting backup.tar.gz" 
-    cd $BACKUP_DIR
-    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
-    rm -rf backup 1> /dev/null
-
-    # Extract backup archive
-    tar -zxvf backup.tar.gz 1> /dev/null
-    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
-    echo
-}
-
 function import_config_old()
 {
-    cd $BACKUP_DIR/backup
-    echo "[ status ] importing config ( $BACKUP_DIR/backup/restore_config.sh )"
-    source restore_config.sh
+    echo "[ status ] importing config ( sandbox/test_website/WebAdminUtils/.config_old.sh )"
+    source sandbox/test_website/WebAdminUtils/.config_old.sh
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
 }
 
@@ -98,11 +74,8 @@ function db_record_validation(){
 
 function main()
 {
-    import_config
-    get_abs_path_backup_dir
-    extract_backup_website
-    echo	
     import_config_old
+    get_abs_path_backup_dir
     echo	
     validate_code
     echo	
