@@ -262,13 +262,13 @@ function main()
     empty_config_check
     remove_trailing_slash
     check_whether_backup_dir_inside_webroot
-    get_abs_path_backup_dir
     get_abs_path_web_root
     input_validation
     db_access_check
     website_data_check
  
     create_backup_dir
+    get_abs_path_backup_dir
     create_backup_dir_with_timestamp
     print_config
     export_website_database
