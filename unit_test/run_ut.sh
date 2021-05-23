@@ -97,7 +97,7 @@ function backup_test_1()
     cp config.sh /tmp/config.sh
     cp .config_old.sh /tmp/.config_old.sh
 
-	./backup_website 1> /dev/null
+	./backup_website
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 
     
@@ -203,6 +203,7 @@ function cleanup()
 	cd $CURRENT_DIR
     rm -rf sandbox
     rm -rf test_website
+    rm -rf $BACKUP_DIR
 }
 
 function main()

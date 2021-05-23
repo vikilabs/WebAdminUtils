@@ -225,6 +225,9 @@ function importe_code()
     cd $SOURCE_PATH
     mv code/* ${NEW_WEBSITE_ROOT_DIR}/
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Website copy failed"; exit 1; }
+    
+    #copy hidden files
+    cp -arf code/. ${NEW_WEBSITE_ROOT_DIR}/
 }
 
 function migration_success()

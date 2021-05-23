@@ -223,8 +223,9 @@ function copy_restore_utils()
 
     mkdir -p $TOOL_NAME
     [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
-    
-    cp $CURRENT_DIR/* $BACKUP_DIR/$BACKUP_LABEL/$TOOL_NAME/
+   
+    cd $CURRENT_DIR
+    cp * $BACKUP_DIR/$BACKUP_LABEL/$TOOL_NAME/
     [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
     
     cp $CURRENT_DIR/config.sh $BACKUP_DIR/$BACKUP_LABEL/$TOOL_NAME/.config_old.sh

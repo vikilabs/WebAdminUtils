@@ -1,7 +1,7 @@
 function import_config_new()
 {
-    echo "[ status ] importing config ( sandbox/test_website/WebAdminUtils/.config_old.sh )"
-    source sandbox/test_website/WebAdminUtils/config.sh
+    echo "[ status ] importing config ( $BACKUP_DIR/backup/config.sh )"
+    source ~/test_backup/backup/WebAdminUtils/config.sh
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
 }
 
@@ -27,8 +27,8 @@ function extract_backup_website()
 
 function import_config_old()
 {
-    echo "[ status ] importing config ( $BACKUP_DIR/backup/restore_config.sh )"
-    source $BACKUP_DIR/backup/restore_config.sh
+    echo "[ status ] importing config ( $BACKUP_DIR/backup/.config_old.sh )"
+    source $BACKUP_DIR/backup/WebAdminUtils/.config_old.sh
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
 }
 
@@ -115,6 +115,21 @@ function db_record_validation(){
 	echo "[ SUCCESS ] db record validation"
 }
 
+
+function negative_validate_credentials()
+{
+    echo "[ status ] old config test, these config variables should not exist in website"
+
+    #New credentials should exist
+    cd $WEBSITE_ROOT_DIR
+    [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }    
+
+    grep "testa.vikilabs.org" -nr . 1> /dev/null 2> /dev/null
+    [ $? -eq 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }    
+
+    echo "[ success ] credentials validation"
+}
+
 function main()
 {
     import_config_new
@@ -128,6 +143,8 @@ function main()
     echo	
     db_record_validation
     echo	
+    negative_validate_credentials
+    echo 
 }
 
 #main code
