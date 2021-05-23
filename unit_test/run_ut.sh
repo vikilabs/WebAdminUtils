@@ -18,26 +18,20 @@ function init_sandbox()
 
     cd sandbox/
     tar -zxvf test_website.tar.gz 1> /dev/null
-    cd ../
 
     echo "[ SUCCESS ] init_sandbox"
 }
 
-function copy_test_config()
+function import_old_config()
 {
-    echo "[ STATUS  ] copy test config"
-
-    cd $CURRENT_DIR
-
-    cp test_config/config.sh sandbox/ 
-    [ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }
-
-    echo "[ SUCCESS ] copy test config"
+    source $CURRENT_DIR/sandbox/test_website/WebAdminUtils/.config_old.sh 
+    [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ] "; exit 1; }
 }
 
-function import_config()
+
+function import_new_config()
 {
-    source $CURRENT_DIR/sandbox/config.sh
+    source $CURRENT_DIR/sandbox/test_website/WebAdminUtils/config.sh 
     [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ] "; exit 1; }
 }
 
@@ -54,7 +48,7 @@ function get_abs_path_backup_dir()
 
 function restore_test_1()
 {
-    cd $CURRENT_DIR/sandbox
+    cd $CURRENT_DIR/sandbox/test_website/WebAdminUtils/
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] restore_test_1"
     ./restore_website 1> /dev/null
@@ -118,7 +112,7 @@ function verify_backup_test_1()
 
 function restore_test_2()
 {
-    cd $CURRENT_DIR/sandbox
+    cd $CURRENT_DIR/sandbox/test_website/WebAdminUtils/
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] restore_test_2"
     ./restore_website 1> /dev/null
@@ -139,7 +133,7 @@ function verify_restore_test_2()
 
 function migrate_test_1()
 {
-    cd $CURRENT_DIR/sandbox
+    cd $CURRENT_DIR/sandbox/test_website/WebAdminUtils/
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ STATUS  ] migrate_test_1"
     ./migrate_website 1> /dev/null  
@@ -185,9 +179,8 @@ function main()
     echo
     get_current_dir
     init_sandbox
-    copy_test_config
-    import_config
-
+    import_old_config
+    
     #Do not change the order of test case execution
     clear_website_and_db
     restore_test_1
