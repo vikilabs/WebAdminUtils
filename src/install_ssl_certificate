@@ -1,0 +1,13 @@
+source config.sh
+[ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+
+EMAIL="$ADMIN_EMAIL"
+DOMAIN="$DOMAIN"
+apt install -y snapd
+snap install core 
+snap refresh core
+apt-get remove -y certbot
+snap install --classic certbot
+ln -s /snap/bin/certbot /usr/bin/certbot
+certbot --apache
+certbot renew --dry-run

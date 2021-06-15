@@ -199,7 +199,7 @@ function get_abs_path_new_website_root()
 #update new configuration in code and database 
 function update_new_config()
 {
-    cd $SOURCE_PATH
+    cd $NEW_WEBSITE_ROOT_DIR
     find . -type f -exec sed -i -e "s/$DB_NAME/$NEW_DB_NAME/g" {} \;
     find . -type f -exec sed -i -e "s/$DB_USERNAME/$NEW_DB_USERNAME/g" {} \;
     find . -type f -exec sed -i -e "s/$DB_PASSWORD/$NEW_DB_PASSWORD/g" {} \;
@@ -208,7 +208,74 @@ function update_new_config()
     find . -type f -exec sed -i -e "s/$DOMAIN/$NEW_DOMAIN/g" {} \;
 }
 
-function importe_database()
+function delete_database()
+{
+    cd $SOURCE_PATH
+    if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
+        mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD -e "DROP DATABASE $NEW_DB_NAME;" 2>/dev/null 1>/dev/null
+    else
+        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD -e "DROP DATABASE $NEW_DB_NAME;" 2>/dev/null 1>/dev/null
+    fi
+
+}
+
+
+function create_database()
+{
+    cd $SOURCE_PATH
+    if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
+        mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD -e "CREATE DATABASE $NEW_DB_NAME;" 2>/dev/null 1>/dev/null
+    else
+        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD -e "CREATE DATABASE $NEW_DB_NAME;" 2>/dev/null 1>/dev/null
+    fi
+
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Database Delete Failed"; exit 1; }
+}
+
+function create_db_user()
+{
+    cd $SOURCE_PATH
+
+    CMD="CREATE USER \"$NEW_DB_USERNAME\"@\"localhost\" IDENTIFIED BY \"$NEW_DB_PASSWORD\";"
+
+    if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
+        mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD -e "$CMD" 2>/dev/null 1>/dev/null
+    else
+        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD -e "$CMD" 2>/dev/null 1>/dev/null
+    fi
+
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Unable to create DB User ( $NEW_DB_USERNAME )"; exit 1; }
+}
+
+function grant_permission2db_user()
+{
+    cd $SOURCE_PATH
+
+    CMD="GRANT ALL PRIVILEGES ON ${NEW_DB_NAME}.* TO \"$NEW_DB_USERNAME\"@\"localhost\";"
+    
+
+    mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD -e "$CMD" 2>/dev/null 1>/dev/null
+
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Unable to grant permission to DB User ( $NEW_DB_USERNAME )"; exit 1; }
+}
+
+
+function delete_db_user()
+{
+    cd $SOURCE_PATH
+
+    CMD="DROP USER \"$NEW_DB_USERNAME\"@\"localhost\";"
+
+    if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
+        mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD -e "$CMD" 2>/dev/null 1>/dev/null 
+    else
+        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD -e "$CMD" 2>/dev/null 1>/dev/null
+    fi
+}
+
+
+
+function import_database()
 {
     cd $SOURCE_PATH
     if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
@@ -220,7 +287,7 @@ function importe_database()
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Database Import Failed"; exit 1; }
 }
 
-function importe_code()
+function import_code()
 {
     cd $SOURCE_PATH
     
@@ -246,17 +313,26 @@ function main()
     empty_config_check_old
     remove_trailing_slash_new
     remove_trailing_slash_old
-    db_empty_check
     dir_empty_check
+    
+    
+    #db_empty_check
+    delete_database
+    create_database
+    delete_db_user
+    create_db_user
+    grant_permission2db_user
+    #dir_empty_check
     check_whether_webroot_dir_inside_source_dir
     print_old_config
     print_new_config
     get_abs_path_new_website_root
+    import_database
+    import_code
     update_new_config
-    importe_database
-    importe_code
     migration_success
 }
 
 # Call Main Function
 main
+
