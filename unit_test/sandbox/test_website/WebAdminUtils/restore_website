@@ -1,0 +1,191 @@
+#!/bin/bash
+
+# restore a website from from backup
+#
+#		Author	: Viki (a) Vignesh Natarajan 
+#		Contact	: vikilabs.org
+#		Licence : MIT
+
+TOOL_NAME="WebAdminUtils"
+
+function get_current_dir()
+{
+    CURRENT_DIR=`pwd -P`
+}
+
+function db_empty_check()
+{
+    if [[ -z $MYSQL_ADMIN_USERNAME ]]; then
+        table_count=$(mysql -u$DB_USERNAME -p$DB_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)
+    else
+        table_count=$(mysql -u$MYSQL_ADMIN_USERNAME -p$MYSQL_ADMIN_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)
+    fi
+
+    if [ $table_count -gt 0 ];then
+        echo "  [ ERROR ] [ ${LINENO} ] DB is not empty ( table_count : $table_count ), truncate database before restore"
+        echo
+        echo "     -> $DB_NAME"
+        echo
+        echo
+        exit 1
+    fi
+}
+
+function dir_empty_check()
+{
+    file_count=`ls ${WEBSITE_ROOT_DIR}/ | wc -l`
+    if [ $file_count -gt 0 ];then
+        echo "  [ ERROR ] [ ${LINENO} ] website root directory is not empty, clear all files before restoring"
+        echo
+        echo "      -> $WEBSITE_ROOT_DIR"
+        echo
+        echo
+        exit 1
+    fi
+}
+
+function import_config()
+{
+    if [ -f "$CURRENT_DIR/.config_old.sh" ]; then
+        echo "  [ status ] importing config ( $CURRENT_DIR/.config_old.sh )"
+        source $CURRENT_DIR/.config_old.sh
+    else
+        echo "  [ ERROR ] Restore Failed, old config file missing ( $CURRENT_DIR/.config_old.sh )"
+        exit 1
+    fi
+}
+
+#Get Website Source Path
+function set_source_path()
+{
+    cd $CURRENT_DIR
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
+    cd ..
+    SOURCE_PATH=`pwd -P`
+}
+
+function check_whether_webroot_dir_inside_source_dir()
+{
+    # Example:
+    #   
+    #   if (/home/backup/website) inside ( /home/backup ) : TRUE 
+    #   
+    if [[ $WEBSITE_ROOT_DIR =~ "$SOURCE_PATH" ]]; then
+        echo
+        echo "  [ possible error ] It looks like new website root directory is inside source directory"
+        echo
+        echo "       -> [ SOURCE_DIR : $SOURCE_PATH ]"
+        echo
+        echo "       -> [ WEBSITE_ROOT_DIR : $WEBSITE_ROOT_DIR ]"
+        echo
+        echo
+        exit 1
+    fi  
+} 
+
+function empty_config_check_old()
+{
+    config_error=0
+
+    echo
+    [ -z $DOMAIN ] && { echo "  [ CONFIG ERROR ] :  DOMAIN" ; config_error=1; }
+    [ -z $DB_NAME ] && { echo "  [ CONFIG ERROR ] :  DB_NAME" ; config_error=1; }
+    [ -z $DB_USERNAME ] && { echo "  [ CONFIG ERROR ] :  DB_USERNAME" ; config_error=1; }
+    [ -z $DB_PASSWORD ] && { echo "  [ CONFIG ERROR ] :  DB_PASSWORD" ; config_error=1; }
+    [ -z $DB_HOST ] && { echo "  [ CONFIG ERROR ] :  DB_HOST" ; config_error=1; }
+    [ -z $DB_PORT ] && { echo "  [ CONFIG ERROR ] :  DB_PORT" ; config_error=1; }
+    [ -z $WEBSITE_ROOT_DIR ] && { echo "  [ CONFIG ERROR ] :  WEBSITE_ROOT_DIR" ; config_error=1; }
+    [ -z $BACKUP_DIR ] && { echo "  [ CONFIG ERROR ] :  BACKUP_DIR" ; config_error=1; }
+    [ -z $LOG_FILE ] && { echo "  [ CONFIG ERROR ] :  LOG_FILE" ; config_error=1; }
+
+    if [ $config_error -eq 1 ]; then
+        echo
+        echo "  [ ERROR ] Website Restore Failed, Invalid Old Configuration( $CURRENT_DIR/.config_old.sh ) "
+        echo
+        exit 1
+   fi
+}
+
+function remove_trailing_slash_old()
+{
+   BACKUP_DIR=`echo ${BACKUP_DIR%/}`
+   BACKUP_DIR=`echo ${BACKUP_DIR%/}`
+   
+   WEBSITE_ROOT_DIR=`echo ${WEBSITE_ROOT_DIR%/}`
+   WEBSITE_ROOT_DIR=`echo ${WEBSITE_ROOT_DIR%/}`
+   
+   DOMAIN=`echo ${DOMAIN%/}`
+   DOMAIN=`echo ${DOMAIN%/}`
+}
+
+function print_config()
+{
+    echo
+    echo "  PREVIOUS SERVER CONFIGURATION"
+    echo
+    echo "  DOMAIN            : $DOMAIN"
+    echo "  Website Root      : $WEBSITE_ROOT_DIR"
+    echo "  DB NAME           : $DB_NAME"
+    echo "  DB USER           : $DB_USERNAME"
+    echo "  DB PASSWORD       : $DB_PASSWORD"
+    echo "  DB HOST           : $DB_HOST"
+    echo "  DB PORT           : $DB_PORT"
+    echo 
+    echo
+    echo
+
+}
+
+function get_abs_path_website_root()
+{
+    cd $WEBSITE_ROOT_DIR
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1; }
+    WEBSITE_ROOT_DIR=`pwd -P`
+}
+
+function importe_database()
+{
+    cd $SOURCE_PATH
+    if [[ -z $MYSQL_ADMIN_USERNAME ]]; then
+        mysql -u$DB_USERNAME  -p$DB_PASSWORD $DB_NAME < db/database.sql
+    else
+        mysql -u$MYSQL_ADMIN_USERNAME  -p$MYSQL_ADMIN_PASSWORD $DB_NAME < db/database.sql
+    fi
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Database Import Failed"; exit 1; }
+}
+
+function importe_code()
+{
+    cd $SOURCE_PATH
+
+    cp -arf code/. ${WEBSITE_ROOT_DIR}/
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Website copy failed"; exit 1; }
+}
+
+function restore_success()
+{
+    echo
+    echo "  [ SUCCESS ] website restore successfully ( $DOMAIN )"
+    echo
+}
+
+
+function main()
+{
+    get_current_dir
+    import_config
+    set_source_path
+    check_whether_webroot_dir_inside_source_dir
+    empty_config_check_old
+    remove_trailing_slash_old
+    print_config
+    get_abs_path_website_root
+    db_empty_check
+    dir_empty_check
+    importe_database
+    importe_code
+    restore_success
+}
+
+# Call Main Function
+main

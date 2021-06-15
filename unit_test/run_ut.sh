@@ -172,7 +172,7 @@ function migrate_test_1()
     cd backup/WebAdminUtils
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 
-    ./migrate_website   
+    ./deploy_website   
 	[ $? -ne 0 ] && { echo "[ UT_ERROR ] [ ${LINENO} ] "; exit 1; }		
 	echo "[ SUCCESS ] migrate_test_1"
 	cd $CURRENT_DIR

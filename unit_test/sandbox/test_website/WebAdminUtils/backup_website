@@ -1,0 +1,283 @@
+#!/bin/bash
+
+# Backup website ( code and database )
+#
+#		Author	: Viki (a) Vignesh Natarajan 
+#		Contact	: vikilabs.org
+#		Licence : MIT
+
+TOOL_NAME="WebAdminUtils"
+
+function get_current_dir()
+{
+    CURRENT_DIR=`pwd -P`
+}
+
+function get_timestamp()
+{
+    DAY=$(date '+%d')
+    MONTH=$(date '+%m')
+    YEAR=$(date '+%Y')
+    HOUR=$(date '+%H')
+    MINUTE=$(date '+%M')
+    TIME_STAMP="D${DAY}${MONTH}${YEAR}_T${HOUR}${MINUTE}"
+}
+
+function import_config()
+{
+    cd $CURRENT_DIR
+    source ./config.sh
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+}
+
+function empty_config_check()
+{
+    config_error=0
+
+    echo
+    [ -z $DOMAIN ] && { echo "  [ CONFIG ERROR ] :  DOMAIN" ; config_error=1; }
+    [ -z $DB_NAME ] && { echo "  [ CONFIG ERROR ] :  DB_NAME" ; config_error=1; }
+    [ -z $DB_USERNAME ] && { echo "  [ CONFIG ERROR ] :  DB_USERNAME" ; config_error=1; }
+    [ -z $DB_PASSWORD ] && { echo "  [ CONFIG ERROR ] :  DB_PASSWORD" ; config_error=1; }
+    [ -z $DB_HOST ] && { echo "  [ CONFIG ERROR ] :  DB_HOST" ; config_error=1; }
+    [ -z $DB_PORT ] && { echo "  [ CONFIG ERROR ] :  DB_PORT" ; config_error=1; }
+    [ -z $WEBSITE_ROOT_DIR ] && { echo "  [ CONFIG ERROR ] :  WEBSITE_ROOT_DIR" ; config_error=1; }
+    [ -z $BACKUP_DIR ] && { echo "  [ CONFIG ERROR ] :  BACKUP_DIR" ; config_error=1; }
+    [[ -z $LOG_FILE ]] && { echo "  [ CONFIG ERROR ] :  LOG_FILE" ; config_error=1; }
+
+    if [ $config_error -eq 1 ]; then
+        echo
+        echo "  [ ERROR ] Fix configuration error and try again ( config.sh ) "
+        echo
+        exit 1
+   fi
+}
+
+function remove_trailing_slash()
+{
+   BACKUP_DIR=`echo ${BACKUP_DIR%/}`
+   BACKUP_DIR=`echo ${BACKUP_DIR%/}`
+   
+   WEBSITE_ROOT_DIR=`echo ${WEBSITE_ROOT_DIR%/}`
+   WEBSITE_ROOT_DIR=`echo ${WEBSITE_ROOT_DIR%/}`
+   
+   DOMAIN=`echo ${DOMAIN%/}`
+   DOMAIN=`echo ${DOMAIN%/}`
+}
+
+function check_whether_backup_dir_inside_webroot()
+{
+    # Example:
+    #   
+    #   if (/home/website) inside ( /home/website/backup ) : TRUE 
+    #   
+ 
+    if [[ $BACKUP_DIR =~ $WEBSITE_ROOT_DIR ]]; then
+        echo
+        echo "  [ possible error ] It looks like backup directory is inside website root"
+        echo
+        echo "       -> [ BACKUP_DIR : $BACKUP_DIR ]"
+        echo
+        echo "       -> [ WEBSITE_ROOT_DIR : $WEBSITE_ROOT_DIR ]"
+        echo
+        echo "  [ suggestion  ] Don't keep backup directory inside website root directory"
+        echo
+        exit 1
+    fi
+}
+
+function create_backup_dir()
+{
+    cd $BACKUP_DIR 2> /dev/null 1>/dev/null
+    if [ $? -ne 0 ]; then
+        mkdir -p $BACKUP_DIR
+    fi 
+}
+
+function get_abs_path_backup_dir()
+{
+    cd $BACKUP_DIR
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+    BACKUP_DIR=`pwd -P`
+}
+
+function get_abs_path_web_root()
+{
+    cd $WEBSITE_ROOT_DIR
+    [ $? -ne 0 ] && { echo "[ ERROR ] [ ${LINENO} ]"; exit 1; }
+    WEBSITE_ROOT_DIR=`pwd -P`
+}
+
+function input_validation()
+{
+    if [ "$WEBSITE_ROOT_DIR" = "$BACKUP_DIR" ]; then
+        echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] WEBSITE_ROOT_DIR and BACKUP_DIR should be different" >> $LOG_FILE
+        exit 1
+    fi
+}
+
+function create_backup_dir_with_timestamp()
+{
+
+    BACKUP_LABEL="${DOMAIN}_${TIME_STAMP}"
+    
+    #remove any backup directory with same name
+    rm -rf "$BACKUP_DIR/$BACKUP_LABEL"
+
+    #create backup directory
+    mkdir -p "$BACKUP_DIR/$BACKUP_LABEL"
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+    mkdir -p "$BACKUP_DIR/$BACKUP_LABEL/code"
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+    mkdir -p "$BACKUP_DIR/$BACKUP_LABEL/db"
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+
+}
+
+function print_config()
+{
+    echo
+    echo "  Website Root      : $WEBSITE_ROOT_DIR"
+    echo "  DB NAME           : $DB_NAME"
+    echo "  DB USER           : $DB_USERNAME"
+    echo "  DB PASSWORD       : xxxxxxxxx"
+    echo "  DB HOST           : $DB_HOST"
+    echo "  DB PORT           : $DB_PORT"
+    echo "  Backup Directory  : $BACKUP_DIR"
+    echo "  Backup Label      : $BACKUP_LABEL"
+    echo "  Backup File       : ${BACKUP_LABEL}.tar.gz"
+    echo 
+}
+
+function db_access_check()
+{
+
+    if [[ -z $MYSQL_ADMIN_USERNAME ]]; then
+        table_count=$(mysql -u$DB_USERNAME -p$DB_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)
+    else
+        table_count=$(mysql -u$MYSQL_ADMIN_USERNAME -p$MYSQL_ADMIN_PASSWORD -h $DB_HOST -P $DB_PORT $DB_NAME -e "SHOW TABLES;" | wc -l)
+    fi
+
+    if [ $? -ne 0 ];then
+        echo "[ ERROR ] [ ${LINENO} ] DB access error"
+        exit 1
+    fi
+
+}
+
+# Check if website content is available or not
+function website_data_check()
+{
+    file_count=`ls ${WEBSITE_ROOT_DIR}/ | wc -l`
+    if [ $file_count -le 0 ];then
+        echo "[ ERROR ] [ ${LINENO} ] website root directory is empty, nothing to backup"
+        exit 1
+    fi
+}
+
+function export_website_database()
+{
+    if [[ -z $MYSQL_ADMIN_USERNAME ]]; then
+        mysqldump -u$DB_USERNAME  -p$DB_PASSWORD $DB_NAME > "$BACKUP_DIR/$BACKUP_LABEL/db/database.sql"
+    else
+        mysqldump -u$MYSQL_ADMIN_USERNAME  -p$MYSQL_ADMIN_PASSWORD $DB_NAME > "$BACKUP_DIR/$BACKUP_LABEL/db/database.sql"
+    fi
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+}
+
+#Export website code and data
+function export_website_data()
+{
+    cp -arf $WEBSITE_ROOT_DIR/. $BACKUP_DIR/$BACKUP_LABEL/code/
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+}
+
+function clear_log_files()
+{
+    cd $BACKUP_DIR/$BACKUP_LABEL/code/
+
+    find . -name "*.log"|while read fname; do
+        echo "" > "$fname"
+    done
+
+    echo "( status ) all log files are truncated"
+
+}
+
+function clear_stale_files()
+{
+    cd $BACKUP_DIR/$BACKUP_LABEL/code/
+
+    #remove wordpress backup files 
+    find . -name "*.wpress"|while read fname; do
+        rm "$fname"
+    done
+
+    echo "( status ) wordpress backup files are removed"
+}
+
+function copy_restore_utils()
+{
+    cd $BACKUP_DIR/$BACKUP_LABEL/
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+
+    mkdir -p $TOOL_NAME
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+   
+    cd $CURRENT_DIR
+    cp * $BACKUP_DIR/$BACKUP_LABEL/$TOOL_NAME/
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+    
+    cp $CURRENT_DIR/config.sh $BACKUP_DIR/$BACKUP_LABEL/$TOOL_NAME/.config_old.sh
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+}
+
+# Compress website backup and create a tar.gz archive
+function generate_backup()
+{
+    cd $BACKUP_DIR
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+
+    tar -czvf "${BACKUP_LABEL}.tar.gz" $BACKUP_LABEL 1> /dev/null
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+
+    #######################  remove $BACKUP_LABEL directory ###################
+    rm -rf $BACKUP_LABEL
+    [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
+
+    echo
+    echo "  [ SUCCESS ] website backup ( $BACKUP_DIR/${BACKUP_LABEL}.tar.gz )"
+    echo "  [ SUCCESS ] website backup ( $BACKUP_DIR/${BACKUP_LABEL}.tar.gz )" >> $LOG_FILE
+    echo
+    echo " WEBSITE BACKUP IS SUCCESSFUL"
+    echo
+}
+
+
+function main()
+{
+    get_current_dir
+    get_timestamp
+    import_config
+    empty_config_check
+    remove_trailing_slash
+    check_whether_backup_dir_inside_webroot
+    get_abs_path_web_root
+    input_validation
+    db_access_check
+    website_data_check
+ 
+    create_backup_dir
+    get_abs_path_backup_dir
+    create_backup_dir_with_timestamp
+    print_config
+    export_website_database
+    export_website_data
+    clear_log_files
+    clear_stale_files
+    copy_restore_utils
+    generate_backup
+}
+
+# Main Code
+main
