@@ -5,14 +5,15 @@
 #enter the website address
 DOMAIN='testa.vikilabs.org'
 
-DB_NAME='u218639858_testa_db'
-DB_USERNAME='u218639858_testa_admin'
-
 #Keep the password inside single quotes ( Do not use double quotes )
 
-DB_PASSWORD='Test$DB123'
-DB_HOST='localhost'
-DB_PORT='3306'
+DB1_NAME='u218639858_testa_db'
+DB1_USERNAME='u218639858_testa_admin'
+DB1_PASSWORD='Test$DB123'
+
+DB2_NAME=''
+DB2_USERNAME=''
+DB2_PASSWORD=''
 
 #OPTIONAL CONFIG [ SPECIAL PREVILAGES ]
 

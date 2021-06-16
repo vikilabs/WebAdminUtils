@@ -28,9 +28,17 @@ function import_new_config()
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ]"; exit 1;}
     
     NEW_DOMAIN=$DOMAIN
-    NEW_DB_NAME=$DB_NAME
-    NEW_DB_USERNAME=$DB_USERNAME
-    NEW_DB_PASSWORD=$DB_PASSWORD
+    
+    NEW_DB1_NAME=$DB1_NAME
+    NEW_DB1_USERNAME=$DB1_USERNAME
+    NEW_DB1_PASSWORD=$DB1_PASSWORD
+ 
+    if [[ -n $DB2_NAME ]]; then
+    	NEW_DB2_NAME=$DB2_NAME
+    	NEW_DB2_USERNAME=$DB2_USERNAME
+    	NEW_DB2_PASSWORD=$DB2_PASSWORD
+    fi
+
     NEW_DB_HOST=$DB_HOST
     NEW_DB_PORT=$DB_PORT
     NEW_WEBSITE_ROOT_DIR=$WEBSITE_ROOT_DIR
@@ -45,9 +53,9 @@ function empty_config_check_new()
     echo
 
     [ -z $NEW_DOMAIN ] && { echo "  [ CONFIG ERROR ] :  NEW_DOMAIN" ; config_error=1; }
-    [ -z $NEW_DB_NAME ] && { echo "  [ CONFIG ERROR ] :  NEW_DB_NAME" ; config_error=1; }
-    [ -z $NEW_DB_USERNAME ] && { echo "  [ CONFIG ERROR ] :  NEW_DB_USERNAME" ; config_error=1; }
-    [ -z $NEW_DB_PASSWORD ] && { echo "  [ CONFIG ERROR ] :  NEW_DB_PASSWORD" ; config_error=1; }
+    [ -z $NEW_DB1_NAME ] && { echo "  [ CONFIG ERROR ] :  NEW_DB1_NAME" ; config_error=1; }
+    [ -z $NEW_DB1_USERNAME ] && { echo "  [ CONFIG ERROR ] :  NEW_DB1_USERNAME" ; config_error=1; }
+    [ -z $NEW_DB1_PASSWORD ] && { echo "  [ CONFIG ERROR ] :  NEW_DB1_PASSWORD" ; config_error=1; }
     [ -z $NEW_DB_HOST ] && { echo "  [ CONFIG ERROR ] :  NEW_DB_HOST" ; config_error=1; }
     [ -z $NEW_DB_PORT ] && { echo "  [ CONFIG ERROR ] :  NEW_DB_PORT" ; config_error=1;  }
     [ -z $NEW_WEBSITE_ROOT_DIR ] && { echo "  [ CONFIG ERROR ] :  NEW_WEBSITE_ROOT_DIR" ; config_error=1; }
@@ -72,15 +80,15 @@ function remove_trailing_slash_new()
 function db_empty_check()
 {
     if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
-        table_count=$(mysql -u$NEW_DB_USERNAME -p$NEW_DB_PASSWORD -h $NEW_DB_HOST -P $NEW_DB_PORT $NEW_DB_NAME -e "SHOW TABLES;" | wc -l)
+        table_count=$(mysql -u$NEW_DB1_USERNAME -p$NEW_DB1_PASSWORD -h $NEW_DB_HOST -P $NEW_DB_PORT $NEW_DB1_NAME -e "SHOW TABLES;" | wc -l)
     else
-        table_count=$(mysql -u$NEW_MYSQL_ADMIN_USERNAME -p$NEW_MYSQL_ADMIN_PASSWORD -h $NEW_DB_HOST -P $NEW_DB_PORT $NEW_DB_NAME -e "SHOW TABLES;" | wc -l)
+        table_count=$(mysql -u$NEW_MYSQL_ADMIN_USERNAME -p$NEW_MYSQL_ADMIN_PASSWORD -h $NEW_DB_HOST -P $NEW_DB_PORT $NEW_DB1_NAME -e "SHOW TABLES;" | wc -l)
     fi
     
     if [ $table_count -gt 0 ];then
         echo "  [ ERROR ] [ ${LINENO} ] DB is not empty ( table_count : $table_count ), truncate database before migrating"
         echo
-        echo "      -> $NEW_DB_NAME"
+        echo "      -> $NEW_DB1_NAME"
         echo
         echo
         exit 1
@@ -133,9 +141,9 @@ function empty_config_check_old()
     
     echo 
     [ -z $DOMAIN ] && { echo "  [ CONFIG ERROR ] :  DOMAIN" ; config_error=1; } 
-    [ -z $DB_NAME ] && { echo "  [ CONFIG ERROR ] :  DB_NAME" ; config_error=1; }
-    [ -z $DB_USERNAME ] && { echo "  [ CONFIG ERROR ] :  DB_USERNAME" ; config_error=1; }
-    [ -z $DB_PASSWORD ] && { echo "  [ CONFIG ERROR ] :  DB_PASSWORD" ; config_error=1; }
+    [ -z $DB1_NAME ] && { echo "  [ CONFIG ERROR ] :  DB1_NAME" ; config_error=1; }
+    [ -z $DB1_USERNAME ] && { echo "  [ CONFIG ERROR ] :  DB1_USERNAME" ; config_error=1; }
+    [ -z $DB1_PASSWORD ] && { echo "  [ CONFIG ERROR ] :  DB1_PASSWORD" ; config_error=1; }
     [ -z $DB_HOST ] && { echo "  [ CONFIG ERROR ] :  DB_HOST" ; config_error=1; }
     [ -z $DB_PORT ] && { echo "  [ CONFIG ERROR ] :  DB_PORT" ; config_error=1; } 
     [ -z $WEBSITE_ROOT_DIR ] && { echo "  [ CONFIG ERROR ] :  WEBSITE_ROOT_DIR" ; config_error=1; }
@@ -166,9 +174,9 @@ function print_old_config()
     echo
     echo "  DOMAIN            : $DOMAIN"
     echo "  Website Root      : $WEBSITE_ROOT_DIR"
-    echo "  DB NAME           : $DB_NAME"
-    echo "  DB USER           : $DB_USERNAME"
-    echo "  DB PASSWORD       : $DB_PASSWORD"
+    echo "  DB NAME           : $DB1_NAME"
+    echo "  DB USER           : $DB1_USERNAME"
+    echo "  DB PASSWORD       : $DB1_PASSWORD"
     echo "  DB HOST           : $DB_HOST"
     echo "  DB PORT       	  : $DB_PORT"
     echo 
@@ -181,9 +189,9 @@ function print_new_config()
     echo 
     echo "  DOMAIN            : $NEW_DOMAIN"
     echo "  Website Root      : $NEW_WEBSITE_ROOT_DIR"
-    echo "  DB NAME           : $NEW_DB_NAME"
-    echo "  DB USER           : $NEW_DB_USERNAME"
-    echo "  DB PASSWORD       : $NEW_DB_PASSWORD"
+    echo "  DB NAME           : $NEW_DB1_NAME"
+    echo "  DB USER           : $NEW_DB1_USERNAME"
+    echo "  DB PASSWORD       : $NEW_DB1_PASSWORD"
     echo "  DB HOST           : $NEW_DB_HOST"
     echo "  DB PORT           : $NEW_DB_PORT"
     echo 
@@ -200,9 +208,9 @@ function get_abs_path_new_website_root()
 function update_new_config()
 {
     cd $NEW_WEBSITE_ROOT_DIR
-    [ "$DB_NAME" != "$NEW_DB_NAME" ] && { find . -type f -exec sed -i -e "s/$DB_NAME/$NEW_DB_NAME/g" {} \; ;}
-    [ "$DB_USERNAME" != "$NEW_DB_USERNAME" ] && { find . -type f -exec sed -i -e "s/$DB_USERNAME/$NEW_DB_USERNAME/g" {} \; ;}
-    [ "$DB_PASSWORD" != "$NEW_DB_PASSWORD" ] && { find . -type f -exec sed -i -e "s/$DB_PASSWORD/$NEW_DB_PASSWORD/g" {} \; ;}
+    [ "$DB1_NAME" != "$NEW_DB1_NAME" ] && { find . -type f -exec sed -i -e "s/$DB1_NAME/$NEW_DB1_NAME/g" {} \; ;}
+    [ "$DB1_USERNAME" != "$NEW_DB1_USERNAME" ] && { find . -type f -exec sed -i -e "s/$DB1_USERNAME/$NEW_DB1_USERNAME/g" {} \; ;}
+    [ "$DB1_PASSWORD" != "$NEW_DB1_PASSWORD" ] && { find . -type f -exec sed -i -e "s/$DB1_PASSWORD/$NEW_DB1_PASSWORD/g" {} \; ;}
     [ "$DB_HOST" != "$NEW_DB_HOST" ] && { find . -type f -exec sed -i -e "s/$DB_HOST/$NEW_DB_HOST/g" {} \; ;}
     [ "$DB_PORT" != "$NEW_DB_PORT" ] && { find . -type f -exec sed -i -e "s/$DB_PORT/$NEW_DB_PORT/g" {} \; ;}
     [ "$DOMAIN" != "$NEW_DOMAIN" ] && { find . -type f -exec sed -i -e "s/$DOMAIN/$NEW_DOMAIN/g" {} \; ;}
@@ -212,9 +220,9 @@ function delete_database()
 {
     cd $SOURCE_PATH
     if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
-        mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD -e "DROP DATABASE $NEW_DB_NAME;" 2>/dev/null 1>/dev/null
+        mysql -u$NEW_DB1_USERNAME  -p$NEW_DB1_PASSWORD -e "DROP DATABASE $NEW_DB1_NAME;" 2>/dev/null 1>/dev/null
     else
-        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD -e "DROP DATABASE $NEW_DB_NAME;" 2>/dev/null 1>/dev/null
+        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD -e "DROP DATABASE $NEW_DB1_NAME;" 2>/dev/null 1>/dev/null
     fi
 
 }
@@ -224,9 +232,9 @@ function create_database()
 {
     cd $SOURCE_PATH
     if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
-        mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD -e "CREATE DATABASE $NEW_DB_NAME;" 2>/dev/null 1>/dev/null
+        mysql -u$NEW_DB1_USERNAME  -p$NEW_DB1_PASSWORD -e "CREATE DATABASE $NEW_DB1_NAME;" 2>/dev/null 1>/dev/null
     else
-        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD -e "CREATE DATABASE $NEW_DB_NAME;" 2>/dev/null 1>/dev/null
+        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD -e "CREATE DATABASE $NEW_DB1_NAME;" 2>/dev/null 1>/dev/null
     fi
 
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Database Delete Failed"; exit 1; }
@@ -236,27 +244,27 @@ function create_db_user()
 {
     cd $SOURCE_PATH
 
-    CMD="CREATE USER \"$NEW_DB_USERNAME\"@\"localhost\" IDENTIFIED BY \"$NEW_DB_PASSWORD\";"
+    CMD="CREATE USER \"$NEW_DB1_USERNAME\"@\"localhost\" IDENTIFIED BY \"$NEW_DB1_PASSWORD\";"
 
     if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
-        mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD -e "$CMD" 2>/dev/null 1>/dev/null
+        mysql -u$NEW_DB1_USERNAME  -p$NEW_DB1_PASSWORD -e "$CMD" 2>/dev/null 1>/dev/null
     else
         mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD -e "$CMD" 2>/dev/null 1>/dev/null
     fi
 
-    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Unable to create DB User ( $NEW_DB_USERNAME )"; exit 1; }
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Unable to create DB User ( $NEW_DB1_USERNAME )"; exit 1; }
 }
 
 function grant_permission2db_user()
 {
     cd $SOURCE_PATH
 
-    CMD="GRANT ALL PRIVILEGES ON ${NEW_DB_NAME}.* TO \"$NEW_DB_USERNAME\"@\"localhost\";"
+    CMD="GRANT ALL PRIVILEGES ON ${NEW_DB1_NAME}.* TO \"$NEW_DB1_USERNAME\"@\"localhost\";"
     
 
     mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD -e "$CMD" 2>/dev/null 1>/dev/null
 
-    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Unable to grant permission to DB User ( $NEW_DB_USERNAME )"; exit 1; }
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Unable to grant permission to DB User ( $NEW_DB1_USERNAME )"; exit 1; }
 }
 
 
@@ -264,10 +272,10 @@ function delete_db_user()
 {
     cd $SOURCE_PATH
 
-    CMD="DROP USER \"$NEW_DB_USERNAME\"@\"localhost\";"
+    CMD="DROP USER \"$NEW_DB1_USERNAME\"@\"localhost\";"
 
     if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
-        mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD -e "$CMD" 2>/dev/null 1>/dev/null 
+        mysql -u$NEW_DB1_USERNAME  -p$NEW_DB1_PASSWORD -e "$CMD" 2>/dev/null 1>/dev/null 
     else
         mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD -e "$CMD" 2>/dev/null 1>/dev/null
     fi
@@ -279,19 +287,41 @@ function import_database()
 {
     cd $SOURCE_PATH
     
-    rm -rf /tmp/database.sql
-    cp db/database.sql /tmp/database.sql 
+    rm -rf /tmp/database1.sql 2>/dev/null 1>/dev/null
+    rm -rf /tmp/database2.sql 2>/dev/null 1>/dev/null
+    
+    cp db/database1.sql /tmp/database1.sql 
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Database Copy Failed"; exit 1; }
-
-    [ "$DOMAIN" != "$NEW_DOMAIN" ] && { sed -i -e "s/$DOMAIN/$NEW_DOMAIN/g" /tmp/database.sql;}    
-
-    if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
-        mysql -u$NEW_DB_USERNAME  -p$NEW_DB_PASSWORD $NEW_DB_NAME < /tmp/database.sql
-    else
-        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD $NEW_DB_NAME < /tmp/database.sql
+    
+    if [[ -n $NEW_DB2_NAME ]]; then
+    	cp db/database2.sql /tmp/database2.sql 
     fi
 
-    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Database Import Failed"; exit 1; }
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Database Copy Failed"; exit 1; }
+
+    [ "$DOMAIN" != "$NEW_DOMAIN" ] && { sed -i -e "s/$DOMAIN/$NEW_DOMAIN/g" /tmp/database1.sql;}    
+    
+    if [[ -n $NEW_DB2_NAME ]]; then
+    	[ "$DOMAIN" != "$NEW_DOMAIN" ] && { sed -i -e "s/$DOMAIN/$NEW_DOMAIN/g" /tmp/database2.sql;}    
+    fi
+
+    if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
+        mysql -u$NEW_DB1_USERNAME  -p$NEW_DB1_PASSWORD $NEW_DB1_NAME < /tmp/database1.sql
+    else
+        mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD $NEW_DB1_NAME < /tmp/database1.sql
+    fi
+
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Database1 Import Failed"; exit 1; }
+    
+    if [[ -n $NEW_DB2_NAME ]]; then
+    	if [[ -z $NEW_MYSQL_ADMIN_USERNAME ]]; then
+        	mysql -u$NEW_DB2_USERNAME  -p$NEW_DB2_PASSWORD $NEW_DB2_NAME < /tmp/database2.sql
+    	else
+        	mysql -u$NEW_MYSQL_ADMIN_USERNAME  -p$NEW_MYSQL_ADMIN_PASSWORD $NEW_DB2_NAME < /tmp/database2.sql
+    	fi
+
+    	[ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Database2 Import Failed"; exit 1; }
+    fi 
 }
 
 function import_code()
