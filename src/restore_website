@@ -193,6 +193,13 @@ function importe_code()
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Website copy failed"; exit 1; }
 }
 
+function import_media()
+{
+    cd $SOURCE_PATH
+    rsync -axuv --remove-source-files media/ ${WEBSITE_ROOT_DIR}/	
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Website import media failed"; exit 1; }
+}
+
 function restore_success()
 {
     echo
@@ -215,6 +222,7 @@ function main()
     dir_empty_check
     importe_database
     importe_code
+    import_media
     restore_success
 }
 

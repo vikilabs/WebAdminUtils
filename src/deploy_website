@@ -332,6 +332,13 @@ function import_code()
     [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Website copy failed"; exit 1; }
 }
 
+function import_media()
+{
+    cd $SOURCE_PATH
+    rsync -axuv --remove-source-files media/ ${WEBSITE_ROOT_DIR}/	
+    [ $? -ne 0 ] && { echo "  [ ERROR ] [ ${LINENO} ] Website import media failed"; exit 1; }
+}
+
 function migration_success()
 {
     echo
@@ -367,6 +374,7 @@ function main()
     get_abs_path_new_website_root
     import_database
     import_code
+    import_media
     update_new_config
     migration_success
 }

@@ -206,6 +206,12 @@ function export_website_data()
     [ $? -ne 0 ] && { echo "[ $TIME_STAMP ] [ ERROR ] [ ${LINENO} ] " >> $LOG_FILE; exit 1; }
 }
 
+function seperate_media_from_data()
+{
+	mkdir -p $BACKUP_DIR/$BACKUP_LABEL/media/
+	rsync -axuv --remove-source-files  --progress --include '*.mp3' --include '*.mp4' --include='*/' --exclude='*' $BACKUP_DIR/$BACKUP_LABEL/code/ $BACKUP_DIR/$BACKUP_LABEL/media/
+}
+
 function clear_log_files()
 {
     cd $BACKUP_DIR/$BACKUP_LABEL/code/
@@ -286,6 +292,7 @@ function main()
     print_config
     export_website_database
     export_website_data
+    seperate_media_from_data
     clear_log_files
     clear_stale_files
     copy_restore_utils
@@ -294,4 +301,3 @@ function main()
 
 # Main Code
 main
-
